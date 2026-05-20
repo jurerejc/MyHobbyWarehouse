@@ -348,6 +348,7 @@ public class MultiImageAssignDialog : Window
         {
             foreach (string sku in skus)
             {
+                if (sku == _sourceSku) { ok++; continue; } // already has the image
                 try
                 {
                     ImageService.SaveImage(sku, _sourcePath);
