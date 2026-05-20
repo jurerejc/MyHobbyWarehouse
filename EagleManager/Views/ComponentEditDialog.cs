@@ -13,6 +13,7 @@ public class ComponentEditDialog : Window
     private readonly DatabaseService _db;
     private readonly Component?      _original;
     private readonly bool            _isNew;
+    private readonly List<Component>? _filteredComponents;
 
     private TextBox  _txSku=null!, _txOldSku=null!, _txAlt=null!;
     private TextBox  _txDesc=null!, _txUnit=null!;
@@ -30,9 +31,10 @@ public class ComponentEditDialog : Window
     private System.Windows.Controls.Image _imgPreview=null!;
     private TextBlock _txImgPath=null!;
 
-    public ComponentEditDialog(Component? comp, DatabaseService db)
+    public ComponentEditDialog(Component? comp, DatabaseService db, List<Component>? filteredComponents = null)
     {
         _db = db; _original = comp; _isNew = comp == null;
+        _filteredComponents = filteredComponents;
         BuildUi();
         if (comp != null) Populate(comp);
     }
@@ -267,7 +269,7 @@ public class ComponentEditDialog : Window
         if (imgPath == null)
         { Err("Najprej dodaj sliko temu elementu, nato jo dodeli ostalim."); return; }
 
-        var dlg = new MultiImageAssignDialog(imgPath, sku, _db);
+        var dlg = new MultiImageAssignDialog(imgPath, sku, _db, _filteredComponents);
         dlg.Owner = this;
         dlg.ShowDialog();
     }

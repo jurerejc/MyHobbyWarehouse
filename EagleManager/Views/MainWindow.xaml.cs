@@ -185,9 +185,15 @@ public partial class MainWindow : Window
         if (dlg.ShowDialog() == true) { LoadComponents(); RefreshStats(); }
     }
 
+    private List<Models.Component> GetFilteredComponents()
+        => _componentsView?.Cast<Models.Component>().ToList() ?? _allComponents;
+
     private void BtnEditComponent_Click(object s, RoutedEventArgs e)
     {        if (GridComponents.SelectedItem is not Models.Component comp) { SetStatus("Izberi element za urejanje."); return; }
-        var dlg = new ComponentEditDialog(comp, _db);
+        var filtered = GetFilteredComponents();
+        var dlg = filtered.Count < _allComponents.Count
+            ? new ComponentEditDialog(comp, _db, filtered)
+            : new ComponentEditDialog(comp, _db);
         if (dlg.ShowDialog() == true) { LoadComponents(); RefreshStats(); }
     }
 

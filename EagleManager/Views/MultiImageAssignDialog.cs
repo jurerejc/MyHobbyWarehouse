@@ -17,6 +17,7 @@ public class MultiImageAssignDialog : Window
     private readonly DatabaseService    _db;
     private readonly string             _sourcePath;
     private readonly string             _sourceSku;
+    private readonly List<Component>?   _filteredComponents;
 
     private List<Component>             _allComponents = [];
     private readonly TextBox            _txSearch;
@@ -24,11 +25,12 @@ public class MultiImageAssignDialog : Window
     private readonly ScrollViewer       _scroll;
     private readonly TextBlock          _txResult;
 
-    public MultiImageAssignDialog(string sourcePath, string sourceSku, DatabaseService db)
+    public MultiImageAssignDialog(string sourcePath, string sourceSku, DatabaseService db, List<Component>? filteredComponents = null)
     {
         _db         = db;
         _sourcePath = sourcePath;
         _sourceSku  = sourceSku;
+        _filteredComponents = filteredComponents;
 
         Title  = "Dodeli sliko vec elementom";
         Width  = 620; Height = 660;
@@ -201,7 +203,7 @@ public class MultiImageAssignDialog : Window
 
         Loaded += (_, _) =>
         {
-            _allComponents = _db.GetAllComponents();
+            _allComponents = _filteredComponents ?? _db.GetAllComponents();
             RefreshList();
         };
     }
