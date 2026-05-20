@@ -1,0 +1,578 @@
+<Window x:Class="EagleManager.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Eagle Manager" Height="780" Width="1280"
+        MinHeight="600" MinWidth="900"
+        WindowStartupLocation="CenterScreen">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="56"/>   <!-- Header -->
+            <RowDefinition Height="*"/>    <!-- Content -->
+            <RowDefinition Height="28"/>   <!-- Status bar -->
+        </Grid.RowDefinitions>
+
+        <!-- ── Header ───────────────────────────────────────────────────── -->
+        <Border Grid.Row="0" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+            <Grid Margin="16,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- PCB trace logo (simple SVG-like path) -->
+                    <Canvas Width="32" Height="32" Margin="0,0,10,0">
+                        <Rectangle Canvas.Left="4"  Canvas.Top="14" Width="24" Height="4"
+                                   Fill="{StaticResource AccentBrush}" RadiusX="2" RadiusY="2"/>
+                        <Ellipse   Canvas.Left="22" Canvas.Top="10" Width="12" Height="12"
+                                   Stroke="{StaticResource AccentBrush}" StrokeThickness="3" Fill="Transparent"/>
+                        <Ellipse   Canvas.Left="3"  Canvas.Top="10" Width="12" Height="12"
+                                   Stroke="{StaticResource AccentBrush}" StrokeThickness="3" Fill="Transparent"/>
+                    </Canvas>
+                    <TextBlock Text="Eagle Manager" Style="{StaticResource HeaderText}" VerticalAlignment="Center"/>
+                    <TextBlock Text=" — komponentna knjižnica &amp; projekti"
+                               Style="{StaticResource SubText}" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                </StackPanel>
+
+                <!-- Stats badges -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0">
+                    <Border Background="{StaticResource CardBrush}" CornerRadius="4" Padding="10,4" Margin="4,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Komponent: " Style="{StaticResource SubText}"/>
+                            <TextBlock x:Name="TxtStatComponents" Foreground="{StaticResource AccentBrush}" FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{StaticResource CardBrush}" CornerRadius="4" Padding="10,4" Margin="4,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Vrednost zaloge: " Style="{StaticResource SubText}"/>
+                            <TextBlock x:Name="TxtStatValue" Foreground="{StaticResource AccentBrush}" FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{StaticResource CardBrush}" CornerRadius="4" Padding="10,4" Margin="4,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Projektov: " Style="{StaticResource SubText}"/>
+                            <TextBlock x:Name="TxtStatProjects" Foreground="{StaticResource AccentBrush}" FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </Border>
+                    <Button Content="💾 Backup" ToolTip="Arhivska kopija baze" Margin="8,0,0,0"
+                            Click="BtnBackup_Click"/>
+                    <Button Content="⚙" ToolTip="Nastavitve (lokacija baze)" Margin="4,0,0,0"
+                            Padding="8,4" Click="BtnSettings_Click"
+                            VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ── Main tab area ────────────────────────────────────────────── -->
+        <TabControl x:Name="MainTab" Grid.Row="1" Margin="8,8,8,4">
+
+            <!-- ════════════ TAB 1 — Knjižnica ════════════ -->
+            <TabItem Header="📦  Knjižnica komponent">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Toolbar -->
+                    <Border Grid.Row="0" Background="{StaticResource PanelBrush}" Padding="8,6" Margin="0,0,0,4">
+                        <WrapPanel Orientation="Horizontal">
+                            <TextBlock Text="Ctrl+F = iskanje" Style="{StaticResource SubText}" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                            <Button Content="➕ Nov" Margin="0,0,4,0"
+                                    Click="BtnAddComponent_Click"/>
+                            <Button Content="✏️ Uredi" Margin="0,0,4,0"
+                                    Click="BtnEditComponent_Click"/>
+                            <Button Content="🗑 Briši" Style="{StaticResource DangerButton}" Margin="0,0,4,0"
+                                    Click="BtnDeleteComponent_Click"/>
+                            <Separator Style="{StaticResource {x:Type Separator}}"
+                                       Width="1" Height="24" Margin="6,0"/>
+                            <Button Content="📤 Izvozi XLSX" Margin="0,0,4,0"
+                                    Click="BtnExportXlsx_Click"/>
+                            <Button Content="📤 Izvozi CSV" Margin="0,0,4,0"
+                                    Click="BtnExportCsv_Click"/>
+                            <Separator Style="{StaticResource {x:Type Separator}}"
+                                       Width="1" Height="24" Margin="6,0"/>
+                            <Button Content="✖ Počisti filtre" Click="BtnClearFilters_Click"/>
+                        </WrapPanel>
+                    </Border>
+
+                    <!-- ── Ctrl+F search bar (hidden by default) ── -->
+                    <Border x:Name="SearchBar" Grid.Row="1"
+                            Background="#FF1A2733"
+                            BorderBrush="{StaticResource AccentBrush}"
+                            BorderThickness="0,0,0,2"
+                            Padding="8,5"
+                            Visibility="Collapsed">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🔍" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBox x:Name="TxtSearch" Width="240" Margin="0,0,8,0"
+                                     KeyDown="TxtSearch_KeyDown"
+                                     TextChanged="TxtSearch_TextChanged"/>
+                            <TextBlock x:Name="TxtSearchCount"
+                                       Style="{StaticResource SubText}"
+                                       VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <Button Content="▲" Margin="0,0,4,0"
+                                    Padding="8,4" Click="BtnSearchPrev_Click"/>
+                            <Button Content="▼" Margin="0,0,8,0"
+                                    Padding="8,4" Click="BtnSearchNext_Click"/>
+                            <Button Content="✕" Padding="8,4"
+                                    Click="BtnSearchClose_Click"/>
+                        </StackPanel>
+                    </Border>
+
+                                        <!-- Component DataGrid -->
+                    <DataGrid x:Name="GridComponents" Grid.Row="2"
+                              SelectionChanged="GridComponents_SelectionChanged"
+                              MouseDoubleClick="GridComponents_DoubleClick"
+                              PreviewMouseMove="Grid_PreviewMouseMove"
+                              MouseLeave="Grid_MouseLeave">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="SKU"  Binding="{Binding Sku}"         Width="65"/>
+                            <DataGridTextColumn Header="Opis" Binding="{Binding Description}" Width="*" MinWidth="200"/>
+
+                            <!-- Filterable columns -->
+                            <DataGridTextColumn Binding="{Binding Category1}" Width="90">
+                                <DataGridTextColumn.Header>
+                                    <DockPanel Tag="Category1">
+                                        <Button DockPanel.Dock="Right" x:Name="FBtnTip"
+                                                Content="▾" Tag="Category1"
+                                                Style="{StaticResource FilterBtnStyle}"
+                                                Click="FilterBtn_Click"/>
+                                        <TextBlock Text="Tip" VerticalAlignment="Center"/>
+                                    </DockPanel>
+                                </DataGridTextColumn.Header>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Binding="{Binding Category3}" Width="80">
+                                <DataGridTextColumn.Header>
+                                    <DockPanel Tag="Category3">
+                                        <Button DockPanel.Dock="Right" x:Name="FBtnVred"
+                                                Content="▾" Tag="Category3"
+                                                Style="{StaticResource FilterBtnStyle}"
+                                                Click="FilterBtn_Click"/>
+                                        <TextBlock Text="Vrednost" VerticalAlignment="Center"/>
+                                    </DockPanel>
+                                </DataGridTextColumn.Header>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Binding="{Binding Category4}" Width="80">
+                                <DataGridTextColumn.Header>
+                                    <DockPanel Tag="Category4">
+                                        <Button DockPanel.Dock="Right" x:Name="FBtnPkg"
+                                                Content="▾" Tag="Category4"
+                                                Style="{StaticResource FilterBtnStyle}"
+                                                Click="FilterBtn_Click"/>
+                                        <TextBlock Text="Ohišje" VerticalAlignment="Center"/>
+                                    </DockPanel>
+                                </DataGridTextColumn.Header>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Binding="{Binding DisplaySmd}" Width="60">
+                                <DataGridTextColumn.Header>
+                                    <DockPanel Tag="DisplaySmd">
+                                        <Button DockPanel.Dock="Right" x:Name="FBtnSmd"
+                                                Content="▾" Tag="DisplaySmd"
+                                                Style="{StaticResource FilterBtnStyle}"
+                                                Click="FilterBtn_Click"/>
+                                        <TextBlock Text="SMD/TH" VerticalAlignment="Center"/>
+                                    </DockPanel>
+                                </DataGridTextColumn.Header>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Binding="{Binding DisplayStock}" Width="75">
+                                <DataGridTextColumn.Header>
+                                    <DockPanel Tag="StockBucket">
+                                        <Button DockPanel.Dock="Right" x:Name="FBtnStock"
+                                                Content="▾" Tag="StockBucket"
+                                                Style="{StaticResource FilterBtnStyle}"
+                                                Click="FilterBtn_Click"/>
+                                        <TextBlock Text="Zaloga" VerticalAlignment="Center"/>
+                                    </DockPanel>
+                                </DataGridTextColumn.Header>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Binding="{Binding DisplayPrice}" Width="80">
+                                <DataGridTextColumn.Header>
+                                    <DockPanel Tag="DisplayPrice">
+                                        <Button DockPanel.Dock="Right" x:Name="FBtnCena"
+                                                Content="▾" Tag="DisplayPrice"
+                                                Style="{StaticResource FilterBtnStyle}"
+                                                Click="FilterBtn_Click"/>
+                                        <TextBlock Text="Cena" VerticalAlignment="Center"/>
+                                    </DockPanel>
+                                </DataGridTextColumn.Header>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Header="Vred. zal." Binding="{Binding DisplayValue}" Width="90"/>
+
+                            <DataGridTextColumn Binding="{Binding DisplayLocation}" Width="70">
+                                <DataGridTextColumn.Header>
+                                    <DockPanel Tag="DisplayLocation">
+                                        <Button DockPanel.Dock="Right" x:Name="FBtnLoc"
+                                                Content="▾" Tag="DisplayLocation"
+                                                Style="{StaticResource FilterBtnStyle}"
+                                                Click="FilterBtn_Click"/>
+                                        <TextBlock Text="Lokacija" VerticalAlignment="Center"/>
+                                    </DockPanel>
+                                </DataGridTextColumn.Header>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Header="MFG part" Binding="{Binding ManufacturerPart}" Width="110"/>
+
+                            <DataGridTextColumn Binding="{Binding LastSupplier}" Width="90">
+                                <DataGridTextColumn.Header>
+                                    <DockPanel Tag="LastSupplier">
+                                        <Button DockPanel.Dock="Right" x:Name="FBtnSupp"
+                                                Content="▾" Tag="LastSupplier"
+                                                Style="{StaticResource FilterBtnStyle}"
+                                                Click="FilterBtn_Click"/>
+                                        <TextBlock Text="Dobavitelj" VerticalAlignment="Center"/>
+                                    </DockPanel>
+                                </DataGridTextColumn.Header>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsLowStock}" Value="True">
+                                        <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+                    </DataGrid>
+
+                    <!-- Detail panel -->
+                    <Border x:Name="PanelComponentDetail" Grid.Row="3"
+                            Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
+                            Padding="10,6" Visibility="Collapsed">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock x:Name="TxtDetailSku"     Style="{StaticResource SubText}"/>
+                                <TextBlock x:Name="TxtDetailDesc"    FontWeight="SemiBold" TextWrapping="Wrap"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="10,0">
+                                <TextBlock x:Name="TxtDetailStock"   Style="{StaticResource SubText}"/>
+                                <TextBlock x:Name="TxtDetailPrice"   Style="{StaticResource SubText}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Margin="10,0">
+                                <TextBlock x:Name="TxtDetailSupp1"   Style="{StaticResource SubText}"/>
+                                <TextBlock x:Name="TxtDetailSupp2"   Style="{StaticResource SubText}"/>
+                                <TextBlock x:Name="TxtDetailSupp3"   Style="{StaticResource SubText}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="3" Margin="10,0">
+                                <TextBlock x:Name="TxtDetailMfg"     Style="{StaticResource SubText}"/>
+                                <TextBlock x:Name="TxtDetailOldSku"  Style="{StaticResource SubText}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- ════════════ TAB 2 — Projekti ════════════ -->
+            <TabItem Header="🖥  Projekti">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="280" MinWidth="200"/>
+                        <ColumnDefinition Width="4"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left — project list -->
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Text="PROJEKTI" Style="{StaticResource SubText}"
+                                   Margin="8,8,8,4" FontWeight="SemiBold"/>
+
+                        <ListBox x:Name="LstProjects" Grid.Row="1"
+                                 Background="Transparent" BorderThickness="0"
+                                 SelectionChanged="LstProjects_SelectionChanged">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Padding="8,6" Margin="2,1" CornerRadius="4">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold"/>
+                                            <TextBlock Text="{Binding BoardName}"   Style="{StaticResource SubText}"/>
+                                            <TextBlock Text="{Binding DisplayDate}" Style="{StaticResource SubText}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <!-- Project actions -->
+                        <WrapPanel Grid.Row="2" Margin="6">
+                            <Button Content="➕ Nov" Margin="2" Click="BtnNewProject_Click"/>
+                            <Button Content="✏️ Uredi" Margin="2" Click="BtnEditProject_Click"/>
+                            <Button Content="🗑" Style="{StaticResource DangerButton}" Margin="2"
+                                    Click="BtnDeleteProject_Click"/>
+                        </WrapPanel>
+                    </Grid>
+
+                    <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch"
+                                  Background="{StaticResource BorderBrush}"/>
+
+                    <!-- Right — BOM for selected project -->
+                    <Grid Grid.Column="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Project header -->
+                        <Border x:Name="PanelProjectHeader" Grid.Row="0"
+                                Background="{StaticResource PanelBrush}" Padding="12,8"
+                                Visibility="Collapsed">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Margin="0,0,0,4">
+                                    <TextBlock x:Name="TxtProjectName"  Style="{StaticResource HeaderText}" FontSize="16" Margin="0,0,0,3"/>
+                                    <TextBlock x:Name="TxtProjectBoard" Style="{StaticResource SubText}"    Margin="0,0,0,2"/>
+                                    <TextBlock x:Name="TxtProjectDesc"  Style="{StaticResource SubText}"    TextWrapping="Wrap"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                                    <TextBlock Text="Ctrl+F" Style="{StaticResource SubText}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <Button Content="📥 Uvozi Eagle CSV" Margin="4,0"
+                                            Click="BtnImportCsv_Click" Style="{StaticResource AccentButton}"/>
+                                    <Button Content="🔍 Preveri zalogo" Margin="4,0"
+                                            Click="BtnStockCheck_Click"/>
+                                    <Button Content="🔨 Odštej sestavo PCBja" Margin="4,0"
+                                            Click="BtnBuild_Click"/>
+                                    <Button Content="📤 Izvozi BOM" Margin="4,0"
+                                            Click="BtnExportBom_Click"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Placeholder when no project selected -->
+                        <TextBlock x:Name="TxtNoProject" Grid.Row="0" Text="← Izberi projekt ali ustvari novega"
+                                   Style="{StaticResource SubText}" Margin="20"
+                                   Visibility="Visible"/>
+
+                        <!-- BOM summary bar -->
+                        <Border Grid.Row="1" Background="{StaticResource CardBrush}" Padding="10,4">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="BOM:" Style="{StaticResource SubText}" Margin="0,0,6,0"/>
+                                <TextBlock x:Name="TxtBomCount"  Style="{StaticResource SubText}" Margin="0,0,16,0"/>
+                                <TextBlock Text="Skupaj:" Style="{StaticResource SubText}" Margin="0,0,6,0"/>
+                                <TextBlock x:Name="TxtBomCost"   Foreground="{StaticResource AccentBrush}" FontWeight="SemiBold" Margin="0,0,16,0"/>
+                                <TextBlock Text="Masa:" Style="{StaticResource SubText}" Margin="0,0,6,0"/>
+                                <TextBlock x:Name="TxtBomMass"   Foreground="{StaticResource AccentBrush}" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- BOM Ctrl+F search bar -->
+                        <Border x:Name="BomSearchBar" Grid.Row="2"
+                                Background="#FF1A2733"
+                                BorderBrush="{StaticResource AccentBrush}"
+                                BorderThickness="0,0,0,2"
+                                Padding="8,5" Visibility="Collapsed">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🔍" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBox x:Name="TxtBomSearch" Width="220" Margin="0,0,8,0"
+                                         KeyDown="TxtBomSearch_KeyDown"
+                                         TextChanged="TxtBomSearch_TextChanged"/>
+                                <TextBlock x:Name="TxtBomSearchCount"
+                                           Style="{StaticResource SubText}"
+                                           VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <Button Content="▼"  Padding="8,4" Margin="0,0,4,0"
+                                        Click="BtnBomSearchNext_Click"/>
+                                <Button Content="▲"  Padding="8,4" Margin="0,0,8,0"
+                                        Click="BtnBomSearchPrev_Click"/>
+                                <Button Content="✕" Padding="8,4"
+                                        Click="BtnBomSearchClose_Click"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- BOM grid -->
+                        <DataGrid x:Name="GridBom" Grid.Row="3" IsReadOnly="True" MouseDoubleClick="GridBom_DoubleClick"
+                              PreviewMouseMove="Grid_PreviewMouseMove"
+                              MouseLeave="Grid_MouseLeave">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Status" Binding="{Binding DisplayStatus}"  Width="52"/>
+                                <DataGridTextColumn Header="SKU"    Binding="{Binding Sku}"            Width="65"/>
+                                <DataGridTextColumn Header="Opis"   Binding="{Binding DisplayDescription}" Width="*" MinWidth="180"/>
+                                <DataGridTextColumn Header="Qty"    Binding="{Binding Qty}"            Width="50"/>
+                                <DataGridTextColumn Header="Enota"  Binding="{Binding Unit}"           Width="55"/>
+                                <DataGridTextColumn Header="Na voljo / Rabimo" Binding="{Binding DisplayAvailability}" Width="130"/>
+                                <DataGridTextColumn Header="€/vrs." Binding="{Binding DisplayLineCost}" Width="80"/>
+                                <DataGridTextColumn Header="Package" Binding="{Binding Package}"       Width="80"/>
+                                <DataGridTextColumn Header="SKU2"   Binding="{Binding Sku2}"           Width="60"/>
+                                <DataGridTextColumn Header="St.2"   Binding="{Binding DisplayStatus2}" Width="45"/>
+                                <DataGridTextColumn Header="Designatorji" Binding="{Binding PartDesignators}" Width="*" MinWidth="120"/>
+                            </DataGrid.Columns>
+                            <DataGrid.RowStyle>
+                                <Style TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Status}" Value="Out">
+                                            <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Status}" Value="Low">
+                                            <Setter Property="Foreground" Value="{StaticResource WarnBrush}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.RowStyle>
+                        </DataGrid>
+
+                        <!-- BOM footer notes -->
+                        <Border Grid.Row="4" Background="{StaticResource PanelBrush}" Padding="10,6"
+                                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="✅ Dovolj" Foreground="{StaticResource AccentBrush}" Margin="0,0,14,0" FontSize="11"/>
+                                <TextBlock Text="⚠️ Premalo" Foreground="{StaticResource WarnBrush}" Margin="0,0,14,0" FontSize="11"/>
+                                <TextBlock Text="❌ Ni na zalogi" Foreground="{StaticResource DangerBrush}" Margin="0,0,14,0" FontSize="11"/>
+                                <TextBlock x:Name="TxtBomWarning" Foreground="{StaticResource DangerBrush}" FontSize="11" Margin="20,0,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <!-- ════════════ TAB 3 — Transakcije ════════════ -->
+            <TabItem Header="📋  Transakcije">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Filter bar -->
+                    <Border Grid.Row="0" Background="{StaticResource PanelBrush}" Padding="8,6" Margin="0,0,0,4">
+                        <WrapPanel>
+                            <TextBlock Text="Ctrl+F = iskanje" Style="{StaticResource SubText}" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                            <TextBlock Text="Filter:" VerticalAlignment="Center" Margin="0,0,4,0"
+                                       Style="{StaticResource SubText}"/>
+                            <TextBox x:Name="TxtTxFilter" Width="100" Margin="0,0,10,0"
+                                     TextChanged="TxtTxFilter_TextChanged"/>
+                            <Button Content="Osveži" Margin="4,0" Click="BtnRefreshTx_Click"/>
+                            <Button Content="➕ Dodaj transakcijo" Margin="10,0,4,0"
+                                    Click="BtnAddTx_Click" Style="{StaticResource AccentButton}"/>
+                        </WrapPanel>
+                    </Border>
+
+                    <!-- Tx Ctrl+F search bar -->
+                    <Border x:Name="TxSearchBar" Grid.Row="1"
+                            Background="#FF1A2733"
+                            BorderBrush="{StaticResource AccentBrush}"
+                            BorderThickness="0,0,0,2"
+                            Padding="8,5" Visibility="Collapsed">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🔍" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBox x:Name="TxtTxSearch" Width="220" Margin="0,0,8,0"
+                                     KeyDown="TxtTxSearch_KeyDown"
+                                     TextChanged="TxtTxSearch_TextChanged"/>
+                            <TextBlock x:Name="TxtTxSearchCount"
+                                       Style="{StaticResource SubText}"
+                                       VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <Button Content="▼ F3" Padding="8,4" Margin="0,0,4,0"
+                                    Click="BtnTxSearchNext_Click"/>
+                            <Button Content="▲" Padding="8,4" Margin="0,0,8,0"
+                                    Click="BtnTxSearchPrev_Click"/>
+                            <Button Content="✕" Padding="8,4"
+                                    Click="BtnTxSearchClose_Click"/>
+                        </StackPanel>
+                    </Border>
+
+                    <DataGrid x:Name="GridTx" Grid.Row="2"
+                              IsReadOnly="True"
+                              MouseDoubleClick="GridTx_DoubleClick">
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="🔍 Odpri detajl skupne"
+                                          Click="MnuOpenTxDetail_Click"/>
+                                <MenuItem Header="↩ Razveljavi skupino (vse transakcije)"
+                                          Click="MnuReverseTxGroup_Click"/>
+                                <Separator/>
+                                <MenuItem Header="🗑 Izbriši skupino (ne spremeni zaloge)"
+                                          Click="MnuDeleteTxGroup_Click"/>
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Datum"         Binding="{Binding DisplayDate}"  Width="130"/>
+                            <DataGridTextColumn Header="Znacka"        Binding="{Binding Tag}"          Width="*" MinWidth="200"/>
+                            <DataGridTextColumn Header="Projekt"       Binding="{Binding ProjectName}"  Width="140"/>
+                            <DataGridTextColumn Header="Tip"           Binding="{Binding DisplayType}"  Width="110"/>
+                            <DataGridTextColumn Header="Komponent"     Binding="{Binding DisplayCount}" Width="100"/>
+                            <DataGridTextColumn Header="Kol. skupaj"   Binding="{Binding DisplayQty}"   Width="90"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <!-- ── Status bar ────────────────────────────────────────────────── -->
+        <Border Grid.Row="2" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
+                Padding="12,0">
+            <TextBlock x:Name="TxtStatus" Style="{StaticResource SubText}" VerticalAlignment="Center"/>
+        </Border>
+    <!-- ── Image hover popup ─────────────────────────────────────────── -->
+        <Popup x:Name="ImagePopup"
+               AllowsTransparency="True"
+               StaysOpen="True"
+               Placement="Mouse"
+               Grid.RowSpan="3"
+               Panel.ZIndex="98">
+            <Border Background="{StaticResource CardBrush}"
+                    BorderBrush="{StaticResource AccentBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="4"
+                    Effect="{x:Null}">
+                <StackPanel>
+                    <Image x:Name="PopupImage"
+                           Width="280" Height="210"
+                           Stretch="Uniform"
+                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <TextBlock x:Name="PopupSku"
+                               FontSize="10" Margin="2,2,2,0"
+                               HorizontalAlignment="Center"
+                               Foreground="{StaticResource SubTextBrush}"/>
+                </StackPanel>
+            </Border>
+        </Popup>
+
+    <!-- ── Busy overlay ──────────────────────────────────────────────── -->
+        <Border x:Name="BusyOverlay"
+                Background="#AA000000"
+                Visibility="Collapsed"
+                Grid.RowSpan="3"
+                Panel.ZIndex="99">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock x:Name="BusyText"
+                           Text="Delam..."
+                           FontSize="22"
+                           FontWeight="SemiBold"
+                           Foreground="#FF4FC1E9"
+                           HorizontalAlignment="Center"/>
+                <TextBlock Text="Prosim počakajte"
+                           FontSize="13"
+                           Foreground="#FF858585"
+                           HorizontalAlignment="Center"
+                           Margin="0,6,0,0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
