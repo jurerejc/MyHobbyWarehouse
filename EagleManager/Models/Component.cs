@@ -80,4 +80,5 @@ public partial class Component : ObservableObject
         .Where(s => !string.IsNullOrEmpty(s)));
 
     public bool IsLowStock         => StockSum <= 0;
+    public bool HasImage           { get; set; }
 }

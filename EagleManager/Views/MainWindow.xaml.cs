@@ -53,6 +53,7 @@ public partial class MainWindow : Window
         try { (_componentsView as System.ComponentModel.IEditableCollectionView)?.CancelEdit(); } catch { }
 
         _allComponents  = _db.GetAllComponents();
+        PrecomputeImageStatus(_allComponents);
         _componentsView = CollectionViewSource.GetDefaultView(_allComponents);
         _componentsView.Filter = FilterPredicate;
         GridComponents.ItemsSource = _componentsView;
@@ -197,6 +198,18 @@ public partial class MainWindow : Window
     {
         var dlg = new ComponentEditDialog(null, _db);
         if (dlg.ShowDialog() == true) { LoadComponents(); RefreshStats(); }
+    }
+
+    private static void PrecomputeImageStatus(List<Models.Component> components)
+    {
+        if (components.Count == 0) return;
+        var imagesDir = Services.ImageService.ImagesFolder;
+        if (!Directory.Exists(imagesDir)) return;
+        var withImages = Directory.EnumerateFiles(imagesDir, "*.*")
+            .Select(f => Path.GetFileNameWithoutExtension(f))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        foreach (var c in components)
+            c.HasImage = withImages.Contains(c.Sku);
     }
 
     private List<Models.Component> GetFilteredComponents()
