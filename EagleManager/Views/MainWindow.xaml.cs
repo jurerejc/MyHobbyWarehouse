@@ -48,10 +48,21 @@ public partial class MainWindow : Window
 
     private void LoadComponents()
     {
-        _allComponents  = _db.GetAllComponents();
-        _componentsView = CollectionViewSource.GetDefaultView(_allComponents);
-        _componentsView.Filter = FilterPredicate;
-        GridComponents.ItemsSource = _componentsView;
+        var fresh = _db.GetAllComponents();
+        if (_componentsView == null)
+        {
+            _allComponents  = fresh;
+            _componentsView = CollectionViewSource.GetDefaultView(_allComponents);
+            _componentsView.Filter = FilterPredicate;
+            GridComponents.ItemsSource = _componentsView;
+        }
+        else
+        {
+            GridComponents.CommitEdit();
+            _allComponents.Clear();
+            _allComponents.AddRange(fresh);
+            _componentsView.Refresh();
+        }
         RefreshFilterStatus();
         UpdateFilterButtonStyles();
     }
