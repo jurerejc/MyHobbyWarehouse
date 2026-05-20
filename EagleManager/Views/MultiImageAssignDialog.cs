@@ -334,8 +334,16 @@ public class MultiImageAssignDialog : Window
             return;
         }
 
+        if (!File.Exists(_sourcePath))
+        {
+            MessageBox.Show($"Izvorna slika ne obstaja:\n{_sourcePath}", "Napaka",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
+        }
+
         System.Windows.Input.Mouse.OverrideCursor = System.Windows.Input.Cursors.Wait;
         int ok = 0, failed = 0;
+        string? firstError = null;
         try
         {
             foreach (string sku in skus)
@@ -345,7 +353,11 @@ public class MultiImageAssignDialog : Window
                     ImageService.SaveImage(sku, _sourcePath);
                     ok++;
                 }
-                catch { failed++; }
+                catch (Exception ex)
+                {
+                    failed++;
+                    firstError ??= $"{sku}: {ex.Message}";
+                }
             }
         }
         finally
@@ -356,6 +368,7 @@ public class MultiImageAssignDialog : Window
         string msg = failed == 0
             ? $"Slika dodeljena {ok} elementom."
             : $"Dodeljena {ok} elementom, {failed} napak.";
+        if (firstError != null) msg += $"\n\nPrva napaka: {firstError}";
 
         _txResult.Text = msg;
         _txResult.Foreground = failed == 0
