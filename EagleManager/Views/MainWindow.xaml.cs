@@ -71,7 +71,15 @@ public partial class MainWindow : Window
 
     private List<string> GetUniqueValues(string colKey)
     {        if (colKey == "StockBucket")  return ["Na zalogi", "Brez zaloge"];        if (colKey == "DisplaySmd")   return ["SMD", "TH"];
-        return _allComponents
+
+        IEnumerable<Models.Component> src = _allComponents;
+        // Apply all other active filters so values are relevant to current selection
+        foreach (var (key, selected) in _columnFilters)
+        {
+            if (key == colKey || selected == null) continue;
+            src = src.Where(c => selected.Contains(GetColValue(c, key)));
+        }
+        return src
             .Select(c => GetColValue(c, colKey))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(v => v)
