@@ -48,23 +48,18 @@ public partial class MainWindow : Window
 
     private void LoadComponents()
     {
-        var fresh = _db.GetAllComponents();
-        if (_componentsView == null)
-        {
-            _allComponents  = fresh;
-            _componentsView = CollectionViewSource.GetDefaultView(_allComponents);
-            _componentsView.Filter = FilterPredicate;
-            GridComponents.ItemsSource = _componentsView;
-        }
-        else
-        {
-            GridComponents.CommitEdit();
-            _allComponents.Clear();
-            _allComponents.AddRange(fresh);
-            _componentsView.Refresh();
-        }
+        _allComponents  = _db.GetAllComponents();
+        _componentsView = CollectionViewSource.GetDefaultView(_allComponents);
+        _componentsView.Filter = FilterPredicate;
+        GridComponents.ItemsSource = _componentsView;
         RefreshFilterStatus();
         UpdateFilterButtonStyles();
+    }
+
+    /// <summary>Defers refresh via Dispatcher to avoid DataGrid edit-transaction conflicts.</summary>
+    private void DeferredLoadComponents()
+    {
+        Dispatcher.BeginInvoke(LoadComponents, System.Windows.Threading.DispatcherPriority.Background);
     }
 
     // ── Column filter logic ──────────────────────────────────────────────────
@@ -193,7 +188,7 @@ public partial class MainWindow : Window
     private void BtnAddComponent_Click(object s, RoutedEventArgs e)
     {
         var dlg = new ComponentEditDialog(null, _db);
-        if (dlg.ShowDialog() == true) { LoadComponents(); RefreshStats(); }
+        if (dlg.ShowDialog() == true) { DeferredLoadComponents(); RefreshStats(); }
     }
 
     private List<Models.Component> GetFilteredComponents()
@@ -205,15 +200,17 @@ public partial class MainWindow : Window
         var dlg = filtered.Count < _allComponents.Count
             ? new ComponentEditDialog(comp, _db, filtered)
             : new ComponentEditDialog(comp, _db);
-        if (dlg.ShowDialog() == true) { LoadComponents(); RefreshStats(); }
+        if (dlg.ShowDialog() == true) { DeferredLoadComponents(); RefreshStats(); }
     }
 
     private void BtnDeleteComponent_Click(object s, RoutedEventArgs e)
     {
-        if (GridComponents.SelectedItem is not Models.Component comp) return;        if (MessageBox.Show($"Izbriši {comp.Sku} — {comp.Description}?", "Potrditev",
- MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
- _db.DeleteComponent(comp.Sku);
-        LoadComponents(); RefreshStats();        SetStatus($"Element {comp.Sku} izbrisan.");
+        if (GridComponents.SelectedItem is not Models.Component comp) return;
+        if (MessageBox.Show($"Izbriši {comp.Sku} — {comp.Description}?", "Potrditev",
+            MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+        _db.DeleteComponent(comp.Sku);
+        DeferredLoadComponents(); RefreshStats();
+        SetStatus($"Element {comp.Sku} izbrisan.");
     }
 
     private void BtnImportBase_Click(object s, RoutedEventArgs e)
