@@ -48,6 +48,10 @@ public partial class MainWindow : Window
 
     private void LoadComponents()
     {
+        // Force DataGrid to exit any pending editing transaction
+        try { GridComponents.CommitEdit(DataGridEditingUnit.Row, true); } catch { }
+        try { (_componentsView as System.ComponentModel.IEditableCollectionView)?.CancelEdit(); } catch { }
+
         _allComponents  = _db.GetAllComponents();
         _componentsView = CollectionViewSource.GetDefaultView(_allComponents);
         _componentsView.Filter = FilterPredicate;
@@ -56,11 +60,7 @@ public partial class MainWindow : Window
         UpdateFilterButtonStyles();
     }
 
-    /// <summary>Defers refresh via Dispatcher to avoid DataGrid edit-transaction conflicts.</summary>
-    private void DeferredLoadComponents()
-    {
-        Dispatcher.BeginInvoke(LoadComponents, System.Windows.Threading.DispatcherPriority.Background);
-    }
+
 
     // ── Column filter logic ──────────────────────────────────────────────────
 
@@ -188,7 +188,7 @@ public partial class MainWindow : Window
     private void BtnAddComponent_Click(object s, RoutedEventArgs e)
     {
         var dlg = new ComponentEditDialog(null, _db);
-        if (dlg.ShowDialog() == true) { DeferredLoadComponents(); RefreshStats(); }
+        if (dlg.ShowDialog() == true) { LoadComponents(); RefreshStats(); }
     }
 
     private List<Models.Component> GetFilteredComponents()
@@ -200,7 +200,7 @@ public partial class MainWindow : Window
         var dlg = filtered.Count < _allComponents.Count
             ? new ComponentEditDialog(comp, _db, filtered)
             : new ComponentEditDialog(comp, _db);
-        if (dlg.ShowDialog() == true) { DeferredLoadComponents(); RefreshStats(); }
+        if (dlg.ShowDialog() == true) { LoadComponents(); RefreshStats(); }
     }
 
     private void BtnDeleteComponent_Click(object s, RoutedEventArgs e)
@@ -209,7 +209,7 @@ public partial class MainWindow : Window
         if (MessageBox.Show($"Izbriši {comp.Sku} — {comp.Description}?", "Potrditev",
             MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
         _db.DeleteComponent(comp.Sku);
-        DeferredLoadComponents(); RefreshStats();
+        LoadComponents(); RefreshStats();
         SetStatus($"Element {comp.Sku} izbrisan.");
     }
 
