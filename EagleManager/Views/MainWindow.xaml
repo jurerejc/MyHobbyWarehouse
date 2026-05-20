@@ -132,22 +132,28 @@
                               MouseLeave="Grid_MouseLeave">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="SKU"  Binding="{Binding Sku}"         Width="65"/>
-                            <DataGridTextColumn Header="Slika" Binding="{Binding HasImage}" Width="50">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Text" Value=""/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding HasImage}" Value="True">
-                                                <Setter Property="Text" Value="🖼"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding HasImage}" Value="False">
-                                                <Setter Property="Text" Value="—"/>
-                                                <Setter Property="Foreground" Value="{StaticResource SubTextBrush}"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
+                            <DataGridTemplateColumn Header="Slika" Width="45">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock TextAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding HasImage}" Value="True">
+                                                            <Setter Property="Text" Value="✓"/>
+                                                            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding HasImage}" Value="False">
+                                                            <Setter Property="Text" Value="—"/>
+                                                            <Setter Property="Foreground" Value="{StaticResource SubTextBrush}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                             <DataGridTextColumn Header="Opis" Binding="{Binding Description}" Width="*" MinWidth="200"/>
 
                             <!-- Filterable columns -->
