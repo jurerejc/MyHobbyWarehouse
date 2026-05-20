@@ -168,6 +168,16 @@ public class ComponentEditDialog : Window
         btnDelImg.Style = (Style)Application.Current.Resources["DangerButton"];
         btnDelImg.Click += BtnDeleteImage_Click;
 
+        var btnDelMulti = new Button
+        {
+            Content = "🗑 Odstrani sliko vsem filtriranim",
+            Padding = new Thickness(10, 6, 10, 6),
+            Margin = new Thickness(0, 6, 0, 0),
+            IsEnabled = _filteredComponents != null && _filteredComponents.Count > 0
+        };
+        btnDelMulti.Style = (Style)Application.Current.Resources["DangerButton"];
+        btnDelMulti.Click += BtnDeleteMulti_Click;
+
         var fmtNote = new TextBlock
         {
             Text = "Podprto: JPG, PNG, BMP\nShrani se v: images/{SKU}.ext",
@@ -179,6 +189,7 @@ public class ComponentEditDialog : Window
         imgCtrl.Children.Add(btnSelImg);
         imgCtrl.Children.Add(btnMulti);
         imgCtrl.Children.Add(btnDelImg);
+        imgCtrl.Children.Add(btnDelMulti);
         imgCtrl.Children.Add(fmtNote);
         Grid.SetColumn(imgCtrl, 1); imgGrid.Children.Add(imgCtrl);
         stack.Children.Add(imgGrid);
@@ -281,6 +292,36 @@ public class ComponentEditDialog : Window
         ImageService.DeleteImages(sku);
         _imgPreview.Source = null;
         _txImgPath.Text = "Ni slike";
+    }
+
+    private void BtnDeleteMulti_Click(object s, RoutedEventArgs e)
+    {
+        if (_filteredComponents == null || _filteredComponents.Count == 0) return;
+
+        int hasImage = _filteredComponents.Count(c => ImageService.FindImage(c.Sku) != null);
+        if (hasImage == 0) { MessageBox.Show("Noben od filtriranih elementov nima slike.", "Opozorilo", MessageBoxButton.OK, MessageBoxImage.Information); return; }
+
+        if (MessageBox.Show($"Odstraniti sliko pri {hasImage} od {_filteredComponents.Count} filtriranih elementov?", "Potrditev", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+
+        int ok = 0;
+        foreach (var c in _filteredComponents)
+        {
+            if (ImageService.FindImage(c.Sku) != null)
+            {
+                ImageService.DeleteImages(c.Sku);
+                ok++;
+            }
+        }
+
+        // Clear preview if current component's image was deleted
+        string curSku = _isNew ? _txSku.Text.Trim() : _original!.Sku;
+        if (ImageService.FindImage(curSku) == null)
+        {
+            _imgPreview.Source = null;
+            _txImgPath.Text = "Ni slike";
+        }
+
+        MessageBox.Show($"Slika odstranjena pri {ok} elementih.", "Dokoncano", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private void Save_Click(object s, RoutedEventArgs e)
