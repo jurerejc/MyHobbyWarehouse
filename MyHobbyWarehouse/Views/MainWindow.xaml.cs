@@ -32,7 +32,7 @@ public partial class MainWindow : Window
         LoadProjects();
         LoadTransactions();
         RefreshStats();
-        SetStatus("Pripravljeno.");
+        SetStatus(TranslationService.Get("StatusReady"));
     }
 
     // ── Stats ────────────────────────────────────────────────────────────────
@@ -40,7 +40,7 @@ public partial class MainWindow : Window
     private void RefreshStats()
     {
         var (val, types, _, projects) = _db.GetStats();
-        TxtStatComponents.Text = types.ToString();        TxtStatValue.Text      = $"{val:F2} €";
+        TxtStatComponents.Text = types.ToString();        TxtStatValue.Text      = TranslationService.Get("StatsValueFormat", val);
         TxtStatProjects.Text   = projects.ToString();
     }
 
@@ -67,11 +67,10 @@ public partial class MainWindow : Window
 
     /// <summary>Returns the filter-display value for a component given a column key.</summary>
     private static string GetColValue(Models.Component c, string colKey) => colKey switch
-    {        "Category1"     => c.Category1,        "Category3"     => c.Category3,        "Category4"     => c.Category4,        "DisplaySmd"    => c.DisplaySmd,        "StockBucket"   => c.StockSum > 0 ? "Na zalogi" : "Brez zaloge",        "DisplayPrice"  => c.DisplayPrice,        "DisplayLocation" => !string.IsNullOrEmpty(c.DisplayLocation) ? c.DisplayLocation : "(brez)",        "LastSupplier"  => !string.IsNullOrEmpty(c.LastSupplier) ? c.LastSupplier : "(brez)",        _ => ""
+    {        "Category1"     => c.Category1,        "Category3"     => c.Category3,        "Category4"     => c.Category4,        "DisplaySmd"    => c.DisplaySmd,        "StockBucket"   => c.StockSum > 0 ? TranslationService.Get("InStock") : TranslationService.Get("OutOfStock"),        "DisplayPrice"  => c.DisplayPrice,        "DisplayLocation" => !string.IsNullOrEmpty(c.DisplayLocation) ? c.DisplayLocation : TranslationService.Get("NoLocation"),        "LastSupplier"  => !string.IsNullOrEmpty(c.LastSupplier) ? c.LastSupplier : TranslationService.Get("NoSupplier"),        _ => ""
     };
-
     private List<string> GetUniqueValues(string colKey)
-    {        if (colKey == "StockBucket")  return ["Na zalogi", "Brez zaloge"];        if (colKey == "DisplaySmd")   return ["SMD", "TH"];
+    {        if (colKey == "StockBucket")  return [TranslationService.Get("InStock"), TranslationService.Get("OutOfStock")];        if (colKey == "DisplaySmd")   return ["SMD", "TH"];
 
         IEnumerable<Models.Component> src = _allComponents;
         // Apply all other active filters so values are relevant to current selection
@@ -135,7 +134,7 @@ public partial class MainWindow : Window
     }
 
     private static string ColKeyToLabel(string colKey) => colKey switch
-    {        "Category1"     => "Tip",        "Category3"     => "Vrednost",        "Category4"     => "Ohišje / Package",        "DisplaySmd"    => "SMD / TH",        "StockBucket"   => "Zaloga",        "DisplayPrice"  => "Cena",        "DisplayLocation" => "Lokacija (rack)",        "LastSupplier"  => "Dobavitelj",
+    {        "Category1"     => TranslationService.Get("FilterColType"),        "Category3"     => TranslationService.Get("FilterColValue"),        "Category4"     => TranslationService.Get("FilterColPackage"),        "DisplaySmd"    => TranslationService.Get("ColSmdTh"),        "StockBucket"   => TranslationService.Get("FilterColStock"),        "DisplayPrice"  => TranslationService.Get("FilterColPrice"),        "DisplayLocation" => TranslationService.Get("FilterColLocation"),        "LastSupplier"  => TranslationService.Get("FilterColSupplier"),
         _ => colKey
     };
 
@@ -169,7 +168,7 @@ public partial class MainWindow : Window
         int shown = _componentsView?.Cast<Models.Component>().Count() ?? 0;
         int total = _allComponents.Count;
         int active = _columnFilters.Count(kv => kv.Value != null);
-        SetStatus(shown == total            ? $"{total} komponent."            : $"Filtrirano: {shown} / {total}  ({active} aktivnih filtrov)");
+        SetStatus(shown == total            ? TranslationService.Get("StatusComponents", total)            : TranslationService.Get("StatusFiltered", shown, total, active));
     }
 
     private void GridComponents_SelectionChanged(object s, SelectionChangedEventArgs e)
@@ -186,12 +185,12 @@ public partial class MainWindow : Window
     private void ShowComponentDetail(Models.Component c)
     {
         PanelComponentDetail.Visibility = Visibility.Visible;        TxtDetailSku.Text   = $"SKU: {c.Sku}  |  Stara SKU: {c.OldSku}  |  Alt: {c.Alt}";
-        TxtDetailDesc.Text  = c.Description;        TxtDetailStock.Text = $"Zaloga: {c.StockSum:F0} {c.Unit}  (R{c.StockRack}-P{c.StockPackage})";        TxtDetailPrice.Text = $"Cena: {c.LastPrice:F4} €  |  Vrednost: {c.StockValue:F2} €  |  {c.MassMg:F0} mg";
-        TxtDetailSupp1.Text = !string.IsNullOrEmpty(c.Supplier1Name)            ? $"S1: {c.Supplier1Name}  {c.Supplier1Sku}  {c.Supplier1Price:F4} €" +              (!string.IsNullOrEmpty(c.Supplier1Url) ? $"  🔗 {c.Supplier1Url}" : "") : "";
-        TxtDetailSupp2.Text = !string.IsNullOrEmpty(c.Supplier2Name)            ? $"S2: {c.Supplier2Name}  {c.Supplier2Sku}  {c.Supplier2Price:F4} €" +              (!string.IsNullOrEmpty(c.Supplier2Url) ? $"  🔗 {c.Supplier2Url}" : "") : "";
-        TxtDetailSupp3.Text = !string.IsNullOrEmpty(c.Supplier3Name)            ? $"S3: {c.Supplier3Name}  {c.Supplier3Sku}  {c.Supplier3Price:F4} €" +              (!string.IsNullOrEmpty(c.Supplier3Url) ? $"  🔗 {c.Supplier3Url}" : "") : "";
-        TxtDetailMfg.Text   = !string.IsNullOrEmpty(c.ManufacturerName)            ? $"MFG: {c.ManufacturerName}  {c.ManufacturerPart}" : "";
-        TxtDetailOldSku.Text = !string.IsNullOrEmpty(c.StickerText)            ? $"Nalepka: {c.StickerText}" : "";
+        TxtDetailDesc.Text  = c.Description;        TxtDetailStock.Text = TranslationService.Get("DetailStock", c.StockSum, c.Unit, c.StockRack, c.StockPackage);        TxtDetailPrice.Text = TranslationService.Get("DetailPrice", c.LastPrice, c.StockValue, c.MassMg);
+        TxtDetailSupp1.Text = !string.IsNullOrEmpty(c.Supplier1Name)            ? TranslationService.Get("DetailSupplier", 1, c.Supplier1Name, c.Supplier1Sku, c.Supplier1Price) +              (!string.IsNullOrEmpty(c.Supplier1Url) ? $"  🔗 {c.Supplier1Url}" : "") : "";
+        TxtDetailSupp2.Text = !string.IsNullOrEmpty(c.Supplier2Name)            ? TranslationService.Get("DetailSupplier", 2, c.Supplier2Name, c.Supplier2Sku, c.Supplier2Price) +              (!string.IsNullOrEmpty(c.Supplier2Url) ? $"  🔗 {c.Supplier2Url}" : "") : "";
+        TxtDetailSupp3.Text = !string.IsNullOrEmpty(c.Supplier3Name)            ? TranslationService.Get("DetailSupplier", 3, c.Supplier3Name, c.Supplier3Sku, c.Supplier3Price) +              (!string.IsNullOrEmpty(c.Supplier3Url) ? $"  🔗 {c.Supplier3Url}" : "") : "";
+        TxtDetailMfg.Text   = !string.IsNullOrEmpty(c.ManufacturerName)            ? TranslationService.Get("DetailMfg", c.ManufacturerName, c.ManufacturerPart) : "";
+        TxtDetailOldSku.Text = !string.IsNullOrEmpty(c.StickerText)            ? TranslationService.Get("DetailLabel", c.StickerText) : "";
     }
 
     private void BtnAddComponent_Click(object s, RoutedEventArgs e)
@@ -203,7 +202,7 @@ public partial class MainWindow : Window
     private void AddComponentToProject()
     {
         if (GridComponents.SelectedItem is not Models.Component comp)
-        { SetStatus("Izberi komponento v seznamu."); return; }
+        { SetStatus(TranslationService.Get("StatusSelectComponent")); return; }
 
         var dlg = new AddToProjectDialog(_db, comp);
         dlg.Owner = this;
@@ -225,7 +224,7 @@ public partial class MainWindow : Window
 
         LoadProjects();
         RefreshStats();
-        SetStatus($"'{comp.Sku}' (x{dlg.Quantity}) dodan na projekt '{dlg.SelectedProject.DisplayName}'.");
+        SetStatus(TranslationService.Get("StatusComponentAddedToProject", comp.Sku, dlg.Quantity, dlg.SelectedProject.DisplayName));
     }
 
     private void BtnAddComponentToProject_Click(object s, RoutedEventArgs e) => AddComponentToProject();
@@ -247,7 +246,7 @@ public partial class MainWindow : Window
         => _componentsView?.Cast<Models.Component>().ToList() ?? _allComponents;
 
     private void BtnEditComponent_Click(object s, RoutedEventArgs e)
-    {        if (GridComponents.SelectedItem is not Models.Component comp) { SetStatus("Izberi element za urejanje."); return; }
+    {        if (GridComponents.SelectedItem is not Models.Component comp) { SetStatus(TranslationService.Get("StatusSelectComponent")); return; }
         var filtered = GetFilteredComponents();
         var dlg = filtered.Count < _allComponents.Count
             ? new ComponentEditDialog(comp, _db, filtered)
@@ -258,18 +257,18 @@ public partial class MainWindow : Window
     private void BtnDeleteComponent_Click(object s, RoutedEventArgs e)
     {
         if (GridComponents.SelectedItem is not Models.Component comp) return;
-        if (MessageBox.Show($"Izbriši {comp.Sku} — {comp.Description}?", "Potrditev",
+        if (MessageBox.Show(TranslationService.Get("ConfirmDeleteComponent", comp.Sku, comp.Description), TranslationService.Get("Confirmation"),
             MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
         _db.DeleteComponent(comp.Sku);
         LoadComponents(); RefreshStats();
-        SetStatus($"Element {comp.Sku} izbrisan.");
+        SetStatus(TranslationService.Get("StatusComponentDeleted", comp.Sku));
     }
 
     private void BtnImportBase_Click(object s, RoutedEventArgs e)
-    {        var dlg = new OpenFileDialog { Filter = "ODS datoteke|*.ods|Vse datoteke|*.*", Title = "Izberi base.ods" };
+    {        var dlg = new OpenFileDialog { Filter = TranslationService.Get("ImportFileFilter"), Title = TranslationService.Get("SelectBaseOds") };
         if (dlg.ShowDialog() != true) return;
-        SetStatus("Uvažanje base.ods …");
-        SetBusy(true, "Uvažam base.ods...");
+        SetStatus(TranslationService.Get("StatusImportingBase"));
+        SetBusy(true, TranslationService.Get("StatusImportingBase"));
         Mouse.OverrideCursor = Cursors.Wait;
 
         try
@@ -277,7 +276,7 @@ public partial class MainWindow : Window
             var (components, errors) = ImportService.ImportBaseOds(dlg.FileName);
 
             if (errors.Count > 0 && components.Count == 0)
-            {                MessageBox.Show(string.Join(" ", errors), "Napake pri uvozu", MessageBoxButton.OK, MessageBoxImage.Error);
+            {                MessageBox.Show(string.Join(" ", errors), TranslationService.Get("ImportErrorsTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -285,7 +284,7 @@ public partial class MainWindow : Window
             foreach (var c in components) { _db.SaveComponent(c); imported++; }
 
             LoadComponents(); RefreshStats();
-            string msg = $"Uvoženo {imported} komponent.";            if (errors.Count > 0) msg += $"Opozorila ({errors.Count}):" + string.Join("", errors.Take(20));            MessageBox.Show(msg, "Uvoz dokončan", MessageBoxButton.OK,
+            string msg = TranslationService.Get("StatusImportDone", imported);            if (errors.Count > 0) msg += TranslationService.Get("ImportWarnings", errors.Count) + string.Join("", errors.Take(20));            MessageBox.Show(msg, TranslationService.Get("ImportDoneTitle"), MessageBoxButton.OK,
  errors.Count > 0 ? MessageBoxImage.Warning : MessageBoxImage.Information);
             SetStatus(msg);
         }
@@ -293,17 +292,17 @@ public partial class MainWindow : Window
     }
 
     private void BtnExportXlsx_Click(object s, RoutedEventArgs e)
-    {        var dlg = new SaveFileDialog { Filter = "Excel datoteke|*.xlsx", FileName = "komponente.xlsx" };
+    {        var dlg = new SaveFileDialog { Filter = TranslationService.Get("ExportXlsxFilter"), FileName = TranslationService.Get("ExportXlsxFilename") };
         if (dlg.ShowDialog() != true) return;
         var forExport = _componentsView?.Cast<Models.Component>().ToList() ?? _allComponents;
-        ExportService.ExportComponentsXlsx(forExport, dlg.FileName);        SetStatus($"Izvoženo {forExport.Count} komponent → {dlg.FileName}");
+        ExportService.ExportComponentsXlsx(forExport, dlg.FileName);        SetStatus(TranslationService.Get("StatusExported", forExport.Count, dlg.FileName));
     }
 
     private void BtnExportCsv_Click(object s, RoutedEventArgs e)
-    {        var dlg = new SaveFileDialog { Filter = "CSV datoteke|*.csv", FileName = "komponente.csv" };
+    {        var dlg = new SaveFileDialog { Filter = TranslationService.Get("ExportCsvFilter"), FileName = TranslationService.Get("ExportCsvFilename") };
         if (dlg.ShowDialog() != true) return;
         var forExport2 = _componentsView?.Cast<Models.Component>().ToList() ?? _allComponents;
-        ExportService.ExportComponentsCsv(forExport2, dlg.FileName);        SetStatus($"Izvoženo {forExport2.Count} komponent → {dlg.FileName}");
+        ExportService.ExportComponentsCsv(forExport2, dlg.FileName);        SetStatus(TranslationService.Get("StatusExported", forExport2.Count, dlg.FileName));
     }
 
     // ── Projects tab ─────────────────────────────────────────────────────────
@@ -337,7 +336,7 @@ public partial class MainWindow : Window
 
         _currentBom = _db.GetBomLinesWithComponents(project.Id);
         GridBom.ItemsSource = _currentBom;
-        UpdateBomSummary();        SetStatus($"Projekt: {project.DisplayName}  —  {_currentBom.Count} BOM vrstic.");
+        UpdateBomSummary();        SetStatus(TranslationService.Get("StatusProjectBom", project.DisplayName, _currentBom.Count));
     }
 
     private void ClearBom()
@@ -353,8 +352,8 @@ public partial class MainWindow : Window
         double mass     = _currentBom.Sum(l => (l.Component?.MassMg ?? 0) * l.Qty);
         int    missing  = _currentBom.Count(l => l.Status == StockStatus.Out);
         int    low      = _currentBom.Count(l => l.Status == StockStatus.Low);
-        TxtBomCount.Text   = $"{count} vrstic";        TxtBomCost.Text    = $"{cost:F2} €";        TxtBomMass.Text    = $"{mass / 1000:F2} g";
-        TxtBomWarning.Text = missing > 0 ? $"⚠ {missing}× ni na zalogi  {low}× premalo"                           : low    > 0 ? $"⚠ {low}× premalo na zalogi"                           : "";
+        TxtBomCount.Text   = TranslationService.Get("BomLines", count);        TxtBomCost.Text    = TranslationService.Get("BomCostFormat", cost);        TxtBomMass.Text    = TranslationService.Get("BomMassFormat", mass / 1000);
+        TxtBomWarning.Text = missing > 0 ? TranslationService.Get("BomSummaryWarn", missing, low)                           : low    > 0 ? TranslationService.Get("BomSummaryWarnLow", low)                           : "";
     }
 
     private void BtnNewProject_Click(object s, RoutedEventArgs e)
@@ -365,48 +364,48 @@ public partial class MainWindow : Window
         LoadProjects();
         RefreshStats();
         // Select newly created project
-        LstProjects.SelectedItem = (LstProjects.ItemsSource as List<Project>)?.FirstOrDefault(p => p.Id == id);        SetStatus($"Projekt '{dlg.Result!.Name}' ustvarjen.");
+        LstProjects.SelectedItem = (LstProjects.ItemsSource as List<Project>)?.FirstOrDefault(p => p.Id == id);        SetStatus(TranslationService.Get("StatusProjectCreated", dlg.Result!.Name));
     }
 
     private void BtnEditProject_Click(object s, RoutedEventArgs e)
-    {        if (LstProjects.SelectedItem is not Project p) { SetStatus("Izberi projekt."); return; }
+    {        if (LstProjects.SelectedItem is not Project p) { SetStatus(TranslationService.Get("StatusSelectProject")); return; }
         var dlg = new ProjectEditDialog(p);
         if (dlg.ShowDialog() != true) return;
         _db.SaveProject(dlg.Result!);
-        LoadProjects();        SetStatus($"Projekt '{dlg.Result!.Name}' posodobljen.");
+        LoadProjects();        SetStatus(TranslationService.Get("StatusProjectUpdated", dlg.Result!.Name));
     }
 
     private void BtnDeleteProject_Click(object s, RoutedEventArgs e)
     {
-        if (LstProjects.SelectedItem is not Project p) return;        if (            MessageBox.Show($"Izbriši projekt '{p.DisplayName}'?" + " " + "Izbrisane bodo tudi vse BOM vrstice.", "Potrditev", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+        if (LstProjects.SelectedItem is not Project p) return;        if (            MessageBox.Show(TranslationService.Get("ConfirmDeleteProject", p.DisplayName), TranslationService.Get("Confirmation"), MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
  _db.DeleteProject(p.Id);
-        LoadProjects(); RefreshStats(); ClearBom();        SetStatus($"Projekt '{p.DisplayName}' izbrisan.");
+        LoadProjects(); RefreshStats(); ClearBom();        SetStatus(TranslationService.Get("StatusProjectDeleted", p.DisplayName));
     }
 
     private void BtnDeleteBomLine_Click(object s, RoutedEventArgs e)
     {
-        if (LstProjects.SelectedItem is not Project p) { SetStatus("Najprej izberi projekt."); return; }
-        if (GridBom.SelectedItem is not BomLine line) { SetStatus("Izberi BOM vrstico za brisanje."); return; }
-        if (MessageBox.Show($"Izbriši BOM vrstico '{line.Sku}' (x{line.Qty})?",
-            "Potrditev", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+        if (LstProjects.SelectedItem is not Project p) { SetStatus(TranslationService.Get("StatusSelectProject")); return; }
+        if (GridBom.SelectedItem is not BomLine line) { SetStatus(TranslationService.Get("StatusSelectBomLine")); return; }
+        if (MessageBox.Show(TranslationService.Get("ConfirmDeleteBomLine", line.Sku, line.Qty),
+            TranslationService.Get("Confirmation"), MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
 
         _db.DeleteBomLine(line.Id);
         LoadBom(p);
-        SetStatus($"BOM vrstica '{line.Sku}' izbrisana.");
+        SetStatus(TranslationService.Get("StatusBomLineDeleted", line.Sku));
     }
 
     private void BtnImportCsv_Click(object s, RoutedEventArgs e)
-    {        if (LstProjects.SelectedItem is not Project p) { SetStatus("Najprej izberi projekt."); return; }
-        var dlg = new OpenFileDialog { Filter = "CSV datoteke|*.csv|Vse datoteke|*.*", Title = "Izberi Eagle BOM CSV" };
+    {        if (LstProjects.SelectedItem is not Project p) { SetStatus(TranslationService.Get("StatusSelectProject")); return; }
+        var dlg = new OpenFileDialog { Filter = TranslationService.Get("ImportCsvFilter"), Title = TranslationService.Get("SelectEagleBomCsv") };
         if (dlg.ShowDialog() != true) return;
 
-        SetBusy(true, "Uvažam Eagle CSV...");
+        SetBusy(true, TranslationService.Get("ImportCsvRunning"));
         Mouse.OverrideCursor = Cursors.Wait;
         try
         {
         var (lines, errors) = ImportService.ImportEagleCsv(dlg.FileName);
         if (lines.Count == 0)
-        {            MessageBox.Show("Ni veljavnih BOM vrstic. " + string.Join(" ", errors), "Napaka", MessageBoxButton.OK, MessageBoxImage.Error);
+        {            MessageBox.Show(TranslationService.Get("ErrorNoValidBomLines") + string.Join(" ", errors), TranslationService.Get("ErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
 
@@ -419,17 +418,17 @@ public partial class MainWindow : Window
             .Select(l => l.Sku2).Distinct().ToList();
         string warnMsg = "";
         if (missing.Count > 0)
-            warnMsg += "SKU-ji niso v knjiznici: " + string.Join(", ", missing) + " | ";
+            warnMsg += TranslationService.Get("WarningSkuNotInLibrary") + string.Join(", ", missing) + " | ";
         if (missing2.Count > 0)
-            warnMsg += "SKU2-ji niso v knjiznici: " + string.Join(", ", missing2) + " | ";
+            warnMsg += TranslationService.Get("WarningSku2NotInLibrary") + string.Join(", ", missing2) + " | ";
         if (!string.IsNullOrEmpty(warnMsg))
-            MessageBox.Show(warnMsg + "Vrstice bodo uvozene, zaloge za manjkajoce SKU-je bodo 0.", "Opozorilo", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(warnMsg + TranslationService.Get("WarningLinesWillBeImported"), TranslationService.Get("WarningTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
 
         _db.SaveBomLines(p.Id, lines);
         LoadBom(p);
 
-        string msg = $"Uvozeno {lines.Count} BOM vrstic";
-        if (errors.Count > 0) msg += $" ({errors.Count} napak)";
+        string msg = TranslationService.Get("StatusBomImported", lines.Count);
+        if (errors.Count > 0) msg += TranslationService.Get("StatusBomImportErrors", errors.Count);
         SetStatus(msg + ".");
         }
         finally { Mouse.OverrideCursor = null; SetBusy(false); }
@@ -438,12 +437,12 @@ public partial class MainWindow : Window
     private void BtnImportProjectOds_Click(object s, RoutedEventArgs e)
     {
         if (LstProjects.SelectedItem is not Models.Project p)
-        { SetStatus("Najprej izberi projekt."); return; }
+        { SetStatus(TranslationService.Get("StatusSelectProject")); return; }
 
         var dlg = new OpenFileDialog
         {
-            Filter = "ODS datoteke|*.ods|Vse datoteke|*.*",
-            Title  = "Izberi projektni ODS (BOM)"
+            Filter = TranslationService.Get("BomOdsFilter"),
+            Title  = TranslationService.Get("SelectProjectOds")
         };
         if (dlg.ShowDialog() != true) return;
 
@@ -451,8 +450,8 @@ public partial class MainWindow : Window
 
         if (importedLines.Count == 0)
         {
-            MessageBox.Show("Ni veljavnih BOM vrstic. Preverite datoteko.",
- "Napaka", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(TranslationService.Get("ErrorNoValidBomLinesCheck"),
+ TranslationService.Get("ErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
 
@@ -461,15 +460,15 @@ public partial class MainWindow : Window
             .Select(l => l.Sku).Distinct().ToList();
         if (missing.Count > 0)
             MessageBox.Show(
- "Naslednji SKU-ji niso v knjižnici:" + " " + string.Join(", ", missing) + " " +
- "Vrstice bodo uvožene, zaloge bodo 0.",
- "Opozorilo", MessageBoxButton.OK, MessageBoxImage.Warning);
+ TranslationService.Get("WarningMissingSkusInLibrary") + string.Join(", ", missing) + " " +
+ TranslationService.Get("WarningLinesWillBeImportedStockZero"),
+ TranslationService.Get("WarningTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
 
         _db.SaveBomLines(p.Id, importedLines);
         LoadBom(p);
 
-        string msg = $"Uvoženo {importedLines.Count} BOM vrstic iz ODS";
-        if (importErrors.Count > 0) msg += $" ({importErrors.Count} napak)";
+        string msg = TranslationService.Get("StatusBomImportedFromOds", importedLines.Count);
+        if (importErrors.Count > 0) msg += TranslationService.Get("StatusBomImportErrors", importErrors.Count);
         SetStatus(msg + ".");
     }
 
@@ -482,36 +481,36 @@ public partial class MainWindow : Window
     }
 
     private void BtnBuild_Click(object s, RoutedEventArgs e)
-    {        if (LstProjects.SelectedItem is not Project p) { SetStatus("Izberi projekt."); return; }        if (_currentBom.Count == 0) { SetStatus("BOM je prazen — uvozi Eagle CSV najprej."); return; }
+    {        if (LstProjects.SelectedItem is not Project p) { SetStatus(TranslationService.Get("StatusSelectProject")); return; }        if (_currentBom.Count == 0) { SetStatus(TranslationService.Get("StatusBomEmpty")); return; }
 
         // Ask how many boards to build
-        var numDlg = new InputDialog("Gradnja PCB", "Koliko PCB-jev bos izdelal?", "1");
+        var numDlg = new InputDialog(TranslationService.Get("BuildTitle"), TranslationService.Get("BuildPrompt"), "1");
 
         if (numDlg.ShowDialog() != true) return;
         if (!int.TryParse(numDlg.InputValue, out int boards) || boards <= 0)
-        {            MessageBox.Show("Neveljava količina.", "Napaka", MessageBoxButton.OK, MessageBoxImage.Error);
+        {            MessageBox.Show(TranslationService.Get("BuildInvalid"), TranslationService.Get("ErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
 
-        var confirm = MessageBox.Show( $"Odšteti zalogo za {boards}× '{p.DisplayName}'? Ta akcija je nepovratna.", "Potrditev gradnje", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        var confirm = MessageBox.Show( TranslationService.Get("BuildConfirm", boards, p.DisplayName), TranslationService.Get("BuildConfirmTitle"), MessageBoxButton.YesNo, MessageBoxImage.Question);
         if (confirm != MessageBoxResult.Yes) return;
 
         Mouse.OverrideCursor = Cursors.Wait;
         try
         {            string tag = $"[{DateTime.Now:yyyy-MM-dd HH:mm}] {p.DisplayName}";
-            var noteDlg = new InputDialog("Opomba", "Opomba / Znacka:", tag);            string notes = noteDlg.ShowDialog() == true ? noteDlg.InputValue : "";
+            var noteDlg = new InputDialog(TranslationService.Get("BuildNoteTitle"), TranslationService.Get("BuildNote"), tag);            string notes = noteDlg.ShowDialog() == true ? noteDlg.InputValue : "";
 
             var warnings = _db.BuildProject(p, boards, notes);
             LoadBom(p);       // refresh BOM with updated stock
             LoadComponents(); // refresh library tab too
             RefreshStats();
             LoadTransactions();
-            string msg = $"Zgrajeno {boards}x {p.DisplayName}.";
+            string msg = TranslationService.Get("BuildDone", boards, p.DisplayName);
             if (warnings.Count > 0)
-                msg += Environment.NewLine + Environment.NewLine + "Opozorila:" + Environment.NewLine + string.Join(Environment.NewLine, warnings);
-            MessageBox.Show(msg, "Gradnja dokončana", MessageBoxButton.OK,
+                msg += Environment.NewLine + Environment.NewLine + TranslationService.Get("BuildWarnings") + Environment.NewLine + string.Join(Environment.NewLine, warnings);
+            MessageBox.Show(msg, TranslationService.Get("BuildDoneTitle"), MessageBoxButton.OK,
  warnings.Count > 0 ? MessageBoxImage.Warning : MessageBoxImage.Information);
-            SetStatus($"Zgrajeno {boards}x {p.DisplayName}.");
+            SetStatus(TranslationService.Get("BuildDone", boards, p.DisplayName));
         }
         finally { Mouse.OverrideCursor = null; SetBusy(false); }
     }
@@ -519,13 +518,13 @@ public partial class MainWindow : Window
     private void BtnExportBom_Click(object s, RoutedEventArgs e)
     {
         if (LstProjects.SelectedItem is not Project p) return;
-        if (_currentBom.Count == 0) { SetStatus("BOM je prazen."); return; }
+        if (_currentBom.Count == 0) { SetStatus(TranslationService.Get("StatusBomEmpty")); return; }
 
         var dlg = new SaveFileDialog
-        {            Filter   = "Excel datoteke|*.xlsx",            FileName = $"BOM_{p.Name}_{p.Revision}.xlsx"
+        {            Filter   = TranslationService.Get("ExportBomFilter"),            FileName = $"BOM_{p.Name}_{p.Revision}.xlsx"
         };
         if (dlg.ShowDialog() != true) return;
-        ExportService.ExportBomXlsx(p, _currentBom, dlg.FileName);        SetStatus($"BOM izvožen → {dlg.FileName}");
+        ExportService.ExportBomXlsx(p, _currentBom, dlg.FileName);        SetStatus(TranslationService.Get("StatusBomExported", dlg.FileName));
     }
 
     private void GridBom_DoubleClick(object s, System.Windows.Input.MouseButtonEventArgs e)
@@ -535,7 +534,7 @@ public partial class MainWindow : Window
 
         var comp = _db.GetComponent(line.Sku);
         if (comp == null)
-        {            MessageBox.Show($"Komponenta {line.Sku} ni v knjižnici.", "Ni najdeno",
+        {            MessageBox.Show(TranslationService.Get("ComponentNotFound", line.Sku), TranslationService.Get("ComponentNotFoundTitle"),
  MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
@@ -567,7 +566,7 @@ public partial class MainWindow : Window
     {
         var dlg = new TransactionDialog(_db);
         if (dlg.ShowDialog() != true) return;
-        LoadTransactions(); LoadComponents(); RefreshStats();        SetStatus("Transakcija dodana.");
+        LoadTransactions(); LoadComponents(); RefreshStats();        SetStatus(TranslationService.Get("StatusTransactionAdded"));
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
@@ -575,22 +574,29 @@ public partial class MainWindow : Window
     private void BtnSettings_Click(object s, RoutedEventArgs e)
     {
         var settings = MyHobbyWarehouse.Services.SettingsService.Load();
-        var dlg = new DbLocationDialog(settings.DatabasePath);
+        string prevLang = settings.Language;
+        var dlg = new DbLocationDialog(settings.DatabasePath, settings.Language);
         dlg.Owner = this;
         if (dlg.ShowDialog() != true) return;
 
         settings.DatabasePath = dlg.SelectedPath;
+        settings.Language = dlg.SelectedLanguage;
         MyHobbyWarehouse.Services.SettingsService.Save(settings);
 
         if (dlg.ComponentsImported)
         {
             LoadComponents();
            
-            RefreshStats();            SetStatus("Komponente uvožene iz base.ods.");
+            RefreshStats();            SetStatus(TranslationService.Get("StatusComponentsImportedFromBase"));
+        }
+        else if (dlg.SelectedLanguage != prevLang)
+        {
+            string langName = TranslationService.GetLanguageName(dlg.SelectedLanguage);
+            MessageBox.Show(TranslationService.Get("SettingsSavedLangChanged", langName), TranslationService.Get("SettingsTitle"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
         else
         {
-            MessageBox.Show( $"Nastavitev shranjena. Nova pot: {settings.DatabasePath} Učinkuje ob naslednjem zagonu aplikacije.", "Nastavitve", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(TranslationService.Get("SettingsSaved", settings.DatabasePath), TranslationService.Get("SettingsTitle"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
 
@@ -660,7 +666,7 @@ public partial class MainWindow : Window
         ).ToList();
 
         _searchIndex = -1;
-        TxtSearchCount.Text = _searchMatches.Count == 0            ? "Ni zadetkov"            : $"0 / {_searchMatches.Count}";
+        TxtSearchCount.Text = _searchMatches.Count == 0            ? TranslationService.Get("NoMatches")            : TranslationService.Get("SearchResults", 0, _searchMatches.Count);
         if (_searchMatches.Count > 0) SearchNext();
     }
 
@@ -706,15 +712,15 @@ public partial class MainWindow : Window
         try
         {
             string path = _db.Backup();
-            SetStatus("Backup shranjen: " + path);
+            SetStatus(TranslationService.Get("BackupDone") + path);
             var backups = _db.GetBackups();
-            string msg = "Backup uspesen:" + Environment.NewLine + path + Environment.NewLine + Environment.NewLine +
-                         $"Skupaj backupov: {backups.Count}";
-            MessageBox.Show(msg, "Backup", MessageBoxButton.OK, MessageBoxImage.Information);
+            string msg = TranslationService.Get("BackupSuccess") + Environment.NewLine + path + Environment.NewLine + Environment.NewLine +
+                         TranslationService.Get("BackupTotal", backups.Count);
+            MessageBox.Show(msg, TranslationService.Get("BackupTitle"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
-            MessageBox.Show("Napaka pri backupu: " + ex.Message, "Napaka",
+            MessageBox.Show(TranslationService.Get("BackupError") + ex.Message, TranslationService.Get("ErrorTitle"),
  MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
@@ -736,7 +742,7 @@ public partial class MainWindow : Window
         win.ShowDialog();
         if (win.StockChanged)
         {
-            SetBusy(true, "Osvezujem podatke...");
+            SetBusy(true, TranslationService.Get("StatusRefreshing"));
             Mouse.OverrideCursor = Cursors.Wait;
             try
             {
@@ -744,7 +750,7 @@ public partial class MainWindow : Window
                 LoadComponents();
                 RefreshStats();
                 if (LstProjects.SelectedItem is Models.Project p) LoadBom(p);
-                SetStatus("Zaloga posodobljena po razveljavitvi.");
+                SetStatus(TranslationService.Get("StatusStockReverted"));
             }
             finally { Mouse.OverrideCursor = null; SetBusy(false); }
         }
@@ -755,22 +761,22 @@ public partial class MainWindow : Window
     {
         if (GridTx.SelectedItem is not Models.TransactionGroup grp) return;
         if (MessageBox.Show(
-            $"Izbriši skupino '{grp.Tag}' ({grp.TransactionCount} zapisov)? Zaloga se ne spremeni.",
-            "Izbriši skupino", MessageBoxButton.YesNo, MessageBoxImage.Warning)
+            TranslationService.Get("ConfirmDeleteTxGroup", grp.Tag, grp.TransactionCount),
+            TranslationService.Get("DeleteTxGroupTitle"), MessageBoxButton.YesNo, MessageBoxImage.Warning)
             != MessageBoxResult.Yes) return;
         _db.DeleteTransactionGroup(grp.Tag);
         LoadTransactions(TxtTxFilter.Text.Trim());
-        SetStatus($"Skupina '{grp.Tag}' izbrisana.");
+        SetStatus(TranslationService.Get("StatusTxGroupDeleted", grp.Tag));
     }
 
     private void MnuReverseTxGroup_Click(object s, RoutedEventArgs e)
     {
         if (GridTx.SelectedItem is not Models.TransactionGroup grp) return;
         if (MessageBox.Show(
-            $"Razveljavi VSE {grp.TransactionCount} transakcij v skupini?",
-            "Razveljavi skupino", MessageBoxButton.YesNo, MessageBoxImage.Warning)
+            TranslationService.Get("ConfirmReverseTxGroup", grp.TransactionCount),
+            TranslationService.Get("ReverseTxGroupTitle"), MessageBoxButton.YesNo, MessageBoxImage.Warning)
             != MessageBoxResult.Yes) return;
-        SetBusy(true, "Razveljavujem transakcije...");
+        SetBusy(true, TranslationService.Get("StatusReversing"));
         Mouse.OverrideCursor = Cursors.Wait;
         try
         {
@@ -779,7 +785,7 @@ public partial class MainWindow : Window
             LoadComponents();
             RefreshStats();
             if (LstProjects.SelectedItem is Models.Project p) LoadBom(p);
-            SetStatus($"Razveljavili {count} transakcij.");
+            SetStatus(TranslationService.Get("StatusTxGroupReverted", count));
         }
         finally { Mouse.OverrideCursor = null; SetBusy(false); }
     }
@@ -864,7 +870,7 @@ public partial class MainWindow : Window
             l.PartDesignators.Contains(q, StringComparison.OrdinalIgnoreCase) ||
             l.Package.Contains(q, StringComparison.OrdinalIgnoreCase)).ToList();
         _bomSearchIdx = -1;
-        TxtBomSearchCount.Text = _bomMatches.Count == 0 ? "Ni zadetkov" : $"0 / {_bomMatches.Count}";
+        TxtBomSearchCount.Text = _bomMatches.Count == 0 ? TranslationService.Get("NoMatches") : TranslationService.Get("SearchResults", 0, _bomMatches.Count);
         if (_bomMatches.Count > 0) BomSearchNext();
     }
 
@@ -921,7 +927,7 @@ public partial class MainWindow : Window
             g.Tag.Contains(q, StringComparison.OrdinalIgnoreCase) ||
             g.ProjectName.Contains(q, StringComparison.OrdinalIgnoreCase)).ToList();
         _txSearchIdx = -1;
-        TxtTxSearchCount.Text = _txMatches.Count == 0 ? "Ni zadetkov" : $"0 / {_txMatches.Count}";
+        TxtTxSearchCount.Text = _txMatches.Count == 0 ? TranslationService.Get("NoMatches") : TranslationService.Get("SearchResults", 0, _txMatches.Count);
         if (_txMatches.Count > 0) TxSearchNext();
     }
 
@@ -958,7 +964,7 @@ public partial class MainWindow : Window
 
     // ── Busy indicator ────────────────────────────────────────────────────────
 
-    private void SetBusy(bool busy, string msg = "Delam...")
+    private void SetBusy(bool busy, string msg = "")
     {
         if (BusyOverlay == null) return;
         BusyOverlay.Visibility = busy ? Visibility.Visible : Visibility.Collapsed;

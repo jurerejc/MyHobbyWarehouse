@@ -1,5 +1,6 @@
 using Microsoft.Data.Sqlite;
 using MyHobbyWarehouse.Models;
+using MyHobbyWarehouse.Services;
 
 namespace MyHobbyWarehouse.Data;
 
@@ -477,14 +478,14 @@ public class DatabaseService
             cmd.CommandText = "SELECT StockSum, Description FROM Components WHERE Sku = @sku";
             cmd.Parameters.AddWithValue("@sku", sku);
             using var r = cmd.ExecuteReader();
-            if (!r.Read()) { warnings.Add($"SKU {sku} ni v knjižnici — preskočen."); return; }
+            if (!r.Read()) { warnings.Add(TranslationService.Get("BuildWarnSkuNotInLib", sku)); return; }
             before = r.IsDBNull(0) ? 0 : r.GetDouble(0);
             desc   = r.IsDBNull(1) ? sku : r.GetString(1);
         }
 
         double after = Math.Max(0, before - needed);
         if (before < needed)
-            warnings.Add($"{sku} ({desc}): rabimo {needed:F0}, na voljo {before:F0}.");
+            warnings.Add(TranslationService.Get("BuildWarnShortage", sku, desc, needed, before));
 
         UpdateStockConn(c, sku, after);
 

@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using MyHobbyWarehouse.Data;
 using MyHobbyWarehouse.Models;
+using MyHobbyWarehouse.Services;
 
 namespace MyHobbyWarehouse.Views;
 
@@ -29,7 +30,7 @@ public class TransactionDialog : Window
     public TransactionDialog(DatabaseService db)
     {
         _db    = db;
-        Title  = "Dodaj transakcijo";
+        Title  = TranslationService.Get("NewTransaction");
         Width  = 480; Height = 540;
         ResizeMode = ResizeMode.NoResize;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
@@ -49,18 +50,18 @@ public class TransactionDialog : Window
         var stack = new StackPanel();
 
         // ── Type ──────────────────────────────────────────────────────────
-        stack.Children.Add(Lbl("Tip transakcije *"));
+        stack.Children.Add(Lbl(TranslationService.Get("TransactionType") + " *"));
         _cmbType = new ComboBox { Margin = new Thickness(0, 0, 0, 10) };
-        _cmbType.Items.Add("Nakup (Purchase)");
-        _cmbType.Items.Add("Ročni vnos (ManualIn)");
-        _cmbType.Items.Add("Ročni odvzem (ManualOut)");
-        _cmbType.Items.Add("Korekcija (Adjustment)");
+        _cmbType.Items.Add(TranslationService.Get("TypePurchase"));
+        _cmbType.Items.Add(TranslationService.Get("TypeManualIn"));
+        _cmbType.Items.Add(TranslationService.Get("TypeManualOut"));
+        _cmbType.Items.Add(TranslationService.Get("TypeAdjustment"));
         _cmbType.SelectedIndex = 0;
         _cmbType.SelectionChanged += (_, _) => UpdateQtySign();
         stack.Children.Add(_cmbType);
 
         // ── SKU with autocomplete ─────────────────────────────────────────
-        stack.Children.Add(Lbl("SKU *"));
+        stack.Children.Add(Lbl(TranslationService.Get("SkuAutocomplete")));
         _txSku = new TextBox { Margin = new Thickness(0, 0, 0, 2) };
         _txSku.TextChanged += TxSku_TextChanged;
         _txSku.KeyDown     += TxSku_KeyDown;
@@ -96,22 +97,22 @@ public class TransactionDialog : Window
         stack.Children.Add(_txDesc);
 
         // ── Qty ───────────────────────────────────────────────────────────
-        stack.Children.Add(Lbl("Količina *  (negativno = odvzem)"));
+        stack.Children.Add(Lbl(TranslationService.Get("QtyPositive")));
         _txQty = new TextBox { Text = "1", Margin = new Thickness(0, 0, 0, 10) };
         stack.Children.Add(_txQty);
 
         // ── Price ─────────────────────────────────────────────────────────
-        stack.Children.Add(Lbl("Cena / kos (€)"));
+        stack.Children.Add(Lbl(TranslationService.Get("PricePerUnit")));
         _txPrice = new TextBox { Text = "0", Margin = new Thickness(0, 0, 0, 10) };
         stack.Children.Add(_txPrice);
 
         // ── Supplier ─────────────────────────────────────────────────────
-        stack.Children.Add(Lbl("Dobavitelj"));
+        stack.Children.Add(Lbl(TranslationService.Get("Supplier")));
         _txSupplier = new TextBox { Margin = new Thickness(0, 0, 0, 10) };
         stack.Children.Add(_txSupplier);
 
         // ── Notes ─────────────────────────────────────────────────────────
-        stack.Children.Add(Lbl("Opomba"));
+        stack.Children.Add(Lbl(TranslationService.Get("Notes")));
         _txNotes = new TextBox
         {
             Height              = 50,
@@ -128,8 +129,8 @@ public class TransactionDialog : Window
             Orientation         = Orientation.Horizontal,
             HorizontalAlignment = HorizontalAlignment.Right
         };
-        var btnCancel = new Button { Content = "Prekliči", Padding = new Thickness(12, 7, 12, 7), Margin = new Thickness(0, 0, 6, 0) };
-        var btnSave   = new Button { Content = "💾 Dodaj", Padding  = new Thickness(18, 7, 18, 7) };
+        var btnCancel = new Button { Content = TranslationService.Get("Cancel"), Padding = new Thickness(12, 7, 12, 7), Margin = new Thickness(0, 0, 6, 0) };
+        var btnSave   = new Button { Content = "💾 " + TranslationService.Get("Add"), Padding  = new Thickness(18, 7, 18, 7) };
         btnSave.Style = (Style)Application.Current.Resources["AccentButton"];
         btnCancel.Click += (_, _) => { DialogResult = false; Close(); };
         btnSave.Click   += Save_Click;
@@ -170,8 +171,8 @@ public class TransactionDialog : Window
         // Resolve exact SKU immediately
         var comp = _db.GetComponent(q);
         _txDesc.Text = comp != null
-            ? $"{comp.Description}  |  Zaloga: {comp.StockSum:F0} {comp.Unit}  |  Cena: {comp.LastPrice:F4} €"
-            : (q.Length > 0 ? "SKU ni v knjižnici" : "");
+            ? $"{comp.Description}  |  {TranslationService.Get("StockColon")} {comp.StockSum:F0} {comp.Unit}  |  {TranslationService.Get("PriceColon")} {comp.LastPrice:F4} €"
+            : (q.Length > 0 ? TranslationService.Get("SkuNotInLib") : "");
 
         if (comp != null && string.IsNullOrEmpty(_txPrice.Text.Replace("0", "").Trim()))
             _txPrice.Text = comp.LastPrice.ToString("F4");
@@ -223,12 +224,12 @@ public class TransactionDialog : Window
     {
         string sku = _txSku.Text.Trim();
         if (string.IsNullOrEmpty(sku))
-        { MessageBox.Show("SKU je obvezen.", "Napaka", MessageBoxButton.OK, MessageBoxImage.Warning); return; }
+        { MessageBox.Show(TranslationService.Get("SkuRequired"), TranslationService.Get("ErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Warning); return; }
 
         if (!double.TryParse(_txQty.Text.Replace(',', '.'),
             System.Globalization.NumberStyles.Any,
             System.Globalization.CultureInfo.InvariantCulture, out double qty) || qty == 0)
-        { MessageBox.Show("Vnesi veljavno količino (≠ 0).", "Napaka", MessageBoxButton.OK, MessageBoxImage.Warning); return; }
+        { MessageBox.Show(TranslationService.Get("QtyRequired"), TranslationService.Get("ErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Warning); return; }
 
         double price = 0;
         double.TryParse(_txPrice.Text.Replace(',', '.'),

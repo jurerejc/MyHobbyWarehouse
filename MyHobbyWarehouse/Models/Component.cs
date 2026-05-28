@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using MyHobbyWarehouse.Services;
 
 namespace MyHobbyWarehouse.Models;
 
@@ -69,13 +70,13 @@ public partial class Component : ObservableObject
 
     // Display helpers
     public string DisplayStock     => $"{StockSum:F0} {Unit}";
-    public string DisplayPrice     => LastPrice  > 0 ? $"{LastPrice:F4} €"  : "—";
-    public string DisplayValue     => StockValue > 0 ? $"{StockValue:F2} €" : "—";
+    public string DisplayPrice     => LastPrice  > 0 ? TranslationService.Get("DisplayPriceFormat", LastPrice)  : TranslationService.Get("ValueNone");
+    public string DisplayValue     => StockValue > 0 ? TranslationService.Get("DisplayValueFormat", StockValue) : TranslationService.Get("ValueNone");
     public string DisplayLocation  => StockRack  > 0
         ? $"R{StockRack}" + (StockPackage > 0 ? $"-P{StockPackage}" : "")
         : "";
-    public string DisplaySmd       => Smd ? "SMD" : "TH";
-    public string DisplayCategory  => string.Join(" / ",
+    public string DisplaySmd       => Smd ? TranslationService.Get("SmdLabel") : TranslationService.Get("ThLabel");
+    public string DisplayCategory  => string.Join(TranslationService.Get("CategorySeparator"),
         new[] { Category1, Category2, Category3, Category4 }
         .Where(s => !string.IsNullOrEmpty(s)));
 

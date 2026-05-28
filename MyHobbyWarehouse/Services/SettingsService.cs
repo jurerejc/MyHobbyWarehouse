@@ -5,6 +5,7 @@ namespace MyHobbyWarehouse.Services;
 public class AppSettings
 {
     public string DatabasePath { get; set; } = string.Empty;
+    public string Language { get; set; } = "en";
 }
 
 public static class SettingsService

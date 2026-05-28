@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using MyHobbyWarehouse.Data;
 using MyHobbyWarehouse.Models;
+using MyHobbyWarehouse.Services;
 
 namespace MyHobbyWarehouse.Views;
 
@@ -26,7 +27,7 @@ public class TransactionDetailWindow : Window
         _db    = db;
         _group = group;
 
-        Title  = $"Detajl transakcije — {(group.Tag.Length > 60 ? group.Tag[..60] + "…" : group.Tag)}";
+        Title  = TranslationService.Get("TxGroupDetail", group.Tag.Length > 60 ? group.Tag[..60] + "…" : group.Tag);
         Width  = 860; Height = 560;
         MinWidth = 700; MinHeight = 400;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
@@ -103,13 +104,13 @@ public class TransactionDetailWindow : Window
             return col;
         }
 
-        _grid.Columns.Add(Col("Datum",     "DisplayDate",         130));
+        _grid.Columns.Add(Col(TranslationService.Get("TransactionDetailColDate"), "DisplayDate",         130));
         _grid.Columns.Add(Col("SKU",       "ComponentSku",         70));
-        _grid.Columns.Add(Col("Opis",      "ComponentDescription", 0, true));
-        _grid.Columns.Add(Col("Tip",       "DisplayType",          90));
-        _grid.Columns.Add(Col("Kol.",      "DisplayQty",           60));
-        _grid.Columns.Add(Col("Cena",      "DisplayPrice",         80));
-        _grid.Columns.Add(Col("Dobavitelj","Supplier",             90));
+        _grid.Columns.Add(Col(TranslationService.Get("ColDescription"),          "ComponentDescription", 0, true));
+        _grid.Columns.Add(Col(TranslationService.Get("ColType"),                "DisplayType",          90));
+        _grid.Columns.Add(Col(TranslationService.Get("TransactionDetailColQuantity"), "DisplayQty",       60));
+        _grid.Columns.Add(Col(TranslationService.Get("ColPrice"),               "DisplayPrice",         80));
+        _grid.Columns.Add(Col(TranslationService.Get("ColSupplier"),            "Supplier",             90));
 
         Grid.SetRow(_grid, 1); root.Children.Add(_grid);
 
@@ -126,7 +127,7 @@ public class TransactionDetailWindow : Window
 
         var btnRedoOne = new Button
         {
-            Content = "↩ Razveljavi izbrano",
+            Content = "↩ " + TranslationService.Get("TxReverseSelected"),
             Padding = new Thickness(14, 7, 14, 7),
             Margin  = new Thickness(0, 0, 8, 0)
         };
@@ -134,7 +135,7 @@ public class TransactionDetailWindow : Window
 
         var btnRedoAll = new Button
         {
-            Content = "↩↩ Razveljavi VSE v skupini",
+            Content = "↩↩ " + TranslationService.Get("TxReverseAll"),
             Padding = new Thickness(14, 7, 14, 7),
             Margin  = new Thickness(0, 0, 8, 0)
         };
@@ -143,7 +144,7 @@ public class TransactionDetailWindow : Window
 
         var btnClose = new Button
         {
-            Content = "Zapri",
+            Content = TranslationService.Get("Close"),
             Padding = new Thickness(14, 7, 14, 7)
         };
         btnClose.Click += (_, _) => Close();
@@ -172,12 +173,12 @@ public class TransactionDetailWindow : Window
     {
         if (_grid.SelectedItem is not StockTransaction tx) return;
 
-        string direction = tx.Qty < 0 ? "doda nazaj" : "odvzame";
+        string direction = tx.Qty < 0 ? TranslationService.Get("TransactionDetailAddsBack") : TranslationService.Get("TransactionDetailRemoves");
         string qty = Math.Abs(tx.Qty).ToString("F0");
 
         if (MessageBox.Show(
-            $"Razveljavi {tx.ComponentSku} ({tx.ComponentDescription}) — {direction} {qty} kos?",
-            "Razveljavi transakcijo", MessageBoxButton.YesNo, MessageBoxImage.Question)
+            TranslationService.Get("TxReverseConfirm", tx.ComponentSku, tx.ComponentDescription, direction, qty),
+            TranslationService.Get("TransactionDetailUndoTitle"), MessageBoxButton.YesNo, MessageBoxImage.Question)
             != MessageBoxResult.Yes) return;
 
         System.Windows.Input.Mouse.OverrideCursor = System.Windows.Input.Cursors.Wait;
@@ -185,7 +186,7 @@ public class TransactionDetailWindow : Window
         {
             _db.ReverseTransaction(tx);
             StockChanged = true;
-            SetStatus($"Razveljavljeno: {tx.ComponentSku}");
+            SetStatus(TranslationService.Get("TxReverseSingleDone", tx.ComponentSku));
         }
         finally { System.Windows.Input.Mouse.OverrideCursor = null; }
     }
@@ -197,8 +198,8 @@ public class TransactionDetailWindow : Window
         if (_items.Count == 0) return;
 
         if (MessageBox.Show(
-            $"Razveljavi VSE {_items.Count} transakcij v skupini '{_group.Tag}'?",
-            "Razveljavi skupino", MessageBoxButton.YesNo, MessageBoxImage.Warning)
+            TranslationService.Get("TxReverseGroupConfirm", _items.Count, _group.Tag),
+            TranslationService.Get("TransactionDetailUndoGroupTitle"), MessageBoxButton.YesNo, MessageBoxImage.Warning)
             != MessageBoxResult.Yes) return;
 
         System.Windows.Input.Mouse.OverrideCursor = System.Windows.Input.Cursors.Wait;
@@ -207,7 +208,7 @@ public class TransactionDetailWindow : Window
             int count = _db.ReverseTransactionGroup(_group.Tag);
             StockChanged = true;
             System.Windows.Input.Mouse.OverrideCursor = null;
-            MessageBox.Show($"Razveljavili {count} transakcij.", "Dokoncano", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(TranslationService.Get("TxReverseDone", count), TranslationService.Get("TransactionDetailDoneTitle"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
         finally { System.Windows.Input.Mouse.OverrideCursor = null; }
         Close();

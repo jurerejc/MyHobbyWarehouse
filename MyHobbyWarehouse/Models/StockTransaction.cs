@@ -1,3 +1,5 @@
+using MyHobbyWarehouse.Services;
+
 namespace MyHobbyWarehouse.Models;
 
 public enum TransactionType
@@ -25,15 +27,15 @@ public class StockTransaction
 
     public string DisplayType => Type switch
     {
-        TransactionType.Purchase   => "Nakup",
-        TransactionType.ManualIn   => "Ročni vnos",
-        TransactionType.ManualOut  => "Ročni odvzem",
-        TransactionType.BuildUse   => "Poraba (build)",
-        TransactionType.Adjustment => "Korekcija",
+        TransactionType.Purchase   => TranslationService.Get("TypePurchaseShort"),
+        TransactionType.ManualIn   => TranslationService.Get("TypeManualInShort"),
+        TransactionType.ManualOut  => TranslationService.Get("TypeManualOutShort"),
+        TransactionType.BuildUse   => TranslationService.Get("TypeBuildUseShort"),
+        TransactionType.Adjustment => TranslationService.Get("TypeAdjustmentShort"),
         _                          => Type.ToString()
     };
 
     public string DisplayQty   => Qty > 0 ? $"+{Qty:F0}" : $"{Qty:F0}";
     public string DisplayDate  => Date.ToString("dd.MM.yyyy HH:mm");
-    public string DisplayPrice => UnitPrice > 0 ? $"{UnitPrice:F4} €" : "—";
+    public string DisplayPrice => UnitPrice > 0 ? TranslationService.Get("DisplayPriceFormat", UnitPrice) : TranslationService.Get("ValueNone");
 }

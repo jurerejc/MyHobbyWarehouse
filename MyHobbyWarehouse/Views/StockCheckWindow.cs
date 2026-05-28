@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using MyHobbyWarehouse.Data;
 using MyHobbyWarehouse.Models;
+using MyHobbyWarehouse.Services;
 
 namespace MyHobbyWarehouse.Views;
 
@@ -22,7 +23,7 @@ public class StockCheckWindow : Window
         _project = project;
         _lines   = lines;
 
-        Title  = $"Preverjanje zaloge — {_project.DisplayName}";
+        Title  = TranslationService.Get("StockCheckTitle", _project.DisplayName);
         Width  = 1020; Height = 660;
         MinWidth = 800; MinHeight = 400;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
@@ -68,18 +69,18 @@ public class StockCheckWindow : Window
             SelectionMode       = DataGridSelectionMode.Single,
         };
 
-        grid.Columns.Add(Col("St.",       "DisplayStatus",       50));
+        grid.Columns.Add(Col(TranslationService.Get("StockCheckColStatus"),  "DisplayStatus",       50));
         grid.Columns.Add(Col("SKU",       "Sku",                 65));
-        grid.Columns.Add(Col("Opis",      "DisplayDescription", 220, true));
+        grid.Columns.Add(Col(TranslationService.Get("ColDescription"),      "DisplayDescription", 220, true));
         grid.Columns.Add(Col("Qty",       "Qty",                 50));
-        grid.Columns.Add(Col("Enota",     "Unit",                55));
-        grid.Columns.Add(Col("Na voljo",  "AvailableStock",       80));
-        grid.Columns.Add(Col("Razlika",   "StockDiff",           70));
-        grid.Columns.Add(Col("€/vrs.",    "DisplayLineCost",      80));
+        grid.Columns.Add(Col(TranslationService.Get("StockCheckColUnit"),   "Unit",                55));
+        grid.Columns.Add(Col(TranslationService.Get("StockCheckColAvailable"), "AvailableStock",  80));
+        grid.Columns.Add(Col(TranslationService.Get("StockCheckDiff"),      "StockDiff",           70));
+        grid.Columns.Add(Col(TranslationService.Get("StockCheckColCostPerUnit"), "DisplayLineCost", 80));
         grid.Columns.Add(Col("Package",   "Package",              80));
         grid.Columns.Add(Col("SKU2",      "Sku2",                 60));
-        grid.Columns.Add(Col("St.2",      "DisplayStatus2",       45));
-        grid.Columns.Add(Col("Designatorji","PartDesignators",    0, true));
+        grid.Columns.Add(Col(TranslationService.Get("StockCheckColStatus2"), "DisplayStatus2",    45));
+        grid.Columns.Add(Col(TranslationService.Get("StockCheckColDesignators"), "PartDesignators", 0, true));
 
         // Build extended view model with diff
         var rows = _lines.Select(l => new BomCheckRow(l)).ToList();
@@ -124,12 +125,12 @@ public class StockCheckWindow : Window
         for (int i = 0; i < 6; i++)
             sumGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-        sumGrid.Children.Add(SumBlock(0, "Skupaj vrstic",    $"{_lines.Count}",         "#FFCCCCCC"));
-        sumGrid.Children.Add(SumBlock(1, "✅ OK",             $"{ok}",                   "#FF4EC994"));
-        sumGrid.Children.Add(SumBlock(2, "⚠️ Premalo",        $"{low}",                  "#FFFFB347"));
-        sumGrid.Children.Add(SumBlock(3, "❌ Ni na zalogi",   $"{miss}",                 "#FFF47174"));
-        sumGrid.Children.Add(SumBlock(4, "Skupaj strošek",   $"{totalCost:F2} €",        "#FF4EC994"));
-        sumGrid.Children.Add(SumBlock(5, "Skupaj masa",      $"{totalMassG:F2} g",       "#FFCCCCCC"));
+        sumGrid.Children.Add(SumBlock(0, TranslationService.Get("StockCheckTotalRows"), $"{_lines.Count}",         "#FFCCCCCC"));
+        sumGrid.Children.Add(SumBlock(1, TranslationService.Get("StockCheckOk"),        $"{ok}",                   "#FF4EC994"));
+        sumGrid.Children.Add(SumBlock(2, TranslationService.Get("StockCheckLow"),       $"{low}",                  "#FFFFB347"));
+        sumGrid.Children.Add(SumBlock(3, TranslationService.Get("StockCheckOut"),       $"{miss}",                 "#FFF47174"));
+        sumGrid.Children.Add(SumBlock(4, TranslationService.Get("StockCheckTotalCost"), $"{totalCost:F2} €",        "#FF4EC994"));
+        sumGrid.Children.Add(SumBlock(5, TranslationService.Get("StockCheckTotalMass"), $"{totalMassG:F2} g",       "#FFCCCCCC"));
 
         footer.Child = sumGrid;
         Grid.SetRow(footer, 2);

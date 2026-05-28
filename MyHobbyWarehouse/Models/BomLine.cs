@@ -1,3 +1,5 @@
+using MyHobbyWarehouse.Services;
+
 namespace MyHobbyWarehouse.Models;
 
 public class BomLine
@@ -59,9 +61,9 @@ public class BomLine
     };
 
     public double LineCost           => (Component?.LastPrice ?? 0) * Qty;
-    public string DisplayLineCost    => LineCost > 0 ? $"{LineCost:F4} €" : "—";
-    public string DisplayAvailability => $"{AvailableStock:F0} / {Qty:F0}";
-    public string DisplayDescription => Component?.Description ?? $"[{Sku}]";
+    public string DisplayLineCost    => LineCost > 0 ? TranslationService.Get("DisplayLineCostFormat", LineCost) : TranslationService.Get("ValueNone");
+    public string DisplayAvailability => TranslationService.Get("DisplayAvailabilityFormat", AvailableStock, Qty);
+    public string DisplayDescription => Component?.Description ?? TranslationService.Get("DisplayDescriptionFallback", Sku);
 }
 
 public enum StockStatus { Ok, Low, Out, Unknown, NotApplicable }

@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using MyHobbyWarehouse.Models;
+using MyHobbyWarehouse.Services;
 
 namespace MyHobbyWarehouse.Views;
 
@@ -13,7 +14,7 @@ public class ProjectEditDialog : Window
 
     public ProjectEditDialog(Project? existing)
     {
-        Title  = existing == null ? "Nov projekt" : "Uredi projekt";
+        Title  = existing == null ? TranslationService.Get("NewProject") : TranslationService.Get("EditProject");
         Width  = 480; Height = 500;
         ResizeMode = ResizeMode.NoResize;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
@@ -27,10 +28,10 @@ public class ProjectEditDialog : Window
         var stack = new StackPanel();
 
         // ── Fields ────────────────────────────────────────────────────────
-        stack.Children.Add(Label("Ime projekta *"));
+        stack.Children.Add(Label(TranslationService.Get("ProjectName") + " *"));
         _txName  = Tb(); stack.Children.Add(_txName);
 
-        stack.Children.Add(Label("Ime PCB (Eagle board)"));
+        stack.Children.Add(Label(TranslationService.Get("BoardName")));
         _txBoard = Tb(); stack.Children.Add(_txBoard);
 
         // Version + Revision on same row
@@ -38,21 +39,21 @@ public class ProjectEditDialog : Window
         verRevGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         verRevGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         var verSp = new StackPanel { Margin = new Thickness(0, 0, 4, 0) };
-        verSp.Children.Add(Label("Verzija (npr. V1, V2)"));
+        verSp.Children.Add(Label(TranslationService.Get("Version")));
         _txVer = Tb();
         verSp.Children.Add(_txVer);
         var revSp = new StackPanel { Margin = new Thickness(4, 0, 0, 0) };
-        revSp.Children.Add(Label("Revizija (npr. A, B)"));
+        revSp.Children.Add(Label(TranslationService.Get("Revision")));
         _txRev = Tb();
         revSp.Children.Add(_txRev);
         Grid.SetColumn(verSp, 0); verRevGrid.Children.Add(verSp);
         Grid.SetColumn(revSp, 1); verRevGrid.Children.Add(revSp);
         stack.Children.Add(verRevGrid);
 
-        stack.Children.Add(Label("Kratek opis"));
+        stack.Children.Add(Label(TranslationService.Get("Description")));
         _txDesc  = Tb(); stack.Children.Add(_txDesc);
 
-        stack.Children.Add(Label("Opombe"));
+        stack.Children.Add(Label(TranslationService.Get("Notes")));
         _txNotes = new TextBox
         {
             AcceptsReturn       = true,
@@ -82,8 +83,8 @@ public class ProjectEditDialog : Window
             Margin              = new Thickness(0, 6, 0, 0)
         };
 
-        var btnCancel = new Button { Content = "Prekliči", Padding = new Thickness(12, 7, 12, 7), Margin = new Thickness(0, 0, 6, 0) };
-        var btnSave   = new Button { Content = "💾 Shrani", Padding = new Thickness(18, 7, 18, 7) };
+        var btnCancel = new Button { Content = TranslationService.Get("Cancel"), Padding = new Thickness(12, 7, 12, 7), Margin = new Thickness(0, 0, 6, 0) };
+        var btnSave   = new Button { Content = "💾 " + TranslationService.Get("Save"), Padding = new Thickness(18, 7, 18, 7) };
         btnSave.Style = (Style)Application.Current.Resources["AccentButton"];
 
         btnCancel.Click += (_, _) => { DialogResult = false; Close(); };
@@ -103,7 +104,7 @@ public class ProjectEditDialog : Window
     {
         if (string.IsNullOrWhiteSpace(_txName.Text))
         {
-            MessageBox.Show("Ime projekta je obvezno.", "Napaka",
+            MessageBox.Show(TranslationService.Get("ProjectNameRequired"), TranslationService.Get("ErrorTitle"),
                 MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }

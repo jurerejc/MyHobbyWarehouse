@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using MyHobbyWarehouse.Services;
 
 namespace MyHobbyWarehouse.Views;
 
@@ -43,8 +44,8 @@ public class InputDialog : Window
             HorizontalAlignment = HorizontalAlignment.Right
         };
 
-        var btnCancel = new Button { Content = "Prekliči", Padding = new Thickness(12, 6, 12, 6), Margin = new Thickness(0, 0, 6, 0) };
-        var btnOk     = new Button { Content = "OK",       Padding = new Thickness(20, 6, 20, 6) };
+        var btnCancel = new Button { Content = TranslationService.Get("Cancel"), Padding = new Thickness(12, 6, 12, 6), Margin = new Thickness(0, 0, 6, 0) };
+        var btnOk     = new Button { Content = TranslationService.Get("OkButton"), Padding = new Thickness(20, 6, 20, 6) };
         btnOk.Style   = (Style)Application.Current.Resources["AccentButton"];
         btnCancel.Click += (_, _) => { DialogResult = false; Close(); };
         btnOk.Click     += (_, _) => Confirm();

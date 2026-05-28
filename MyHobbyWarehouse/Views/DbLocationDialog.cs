@@ -13,13 +13,15 @@ public class DbLocationDialog : Window
 {
     public string SelectedPath { get; private set; } = SettingsService.DefaultDbPath;
     public bool ComponentsImported { get; private set; } = false;
+    public string SelectedLanguage { get; private set; } = "en";
 
     private readonly TextBox _txPath;
+    private readonly ComboBox _cmbLanguage;
 
-    public DbLocationDialog(string? currentPath)
+    public DbLocationDialog(string? currentPath, string? currentLanguage = null)
     {
-        Title  = "Lokacija baze podatkov";
-        Width  = 560; Height = 440;
+        Title  = string.IsNullOrEmpty(currentPath) ? TranslationService.Get("FirstRunTitle") : TranslationService.Get("SettingsTitle");
+        Width  = 560; Height = 520;
         ResizeMode = ResizeMode.NoResize;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
 
@@ -33,7 +35,7 @@ public class DbLocationDialog : Window
         // Title
         var title = new TextBlock
         {
-            Text       = "Izberi lokacijo baze podatkov",
+            Text       = TranslationService.Get("FirstRunTitle"),
             FontSize   = 16,
             FontWeight = FontWeights.SemiBold,
             Margin     = new Thickness(0, 0, 0, 6)
@@ -43,7 +45,7 @@ public class DbLocationDialog : Window
 
         var sub = new TextBlock
         {
-            Text       = "Baza (SQLite .db datoteka) se ustvari avtomatično, če še ne obstaja.",
+            Text       = TranslationService.Get("FirstRunInfo"),
             FontSize   = 11,
             Margin     = new Thickness(0, 0, 0, 16)
         };
@@ -67,7 +69,7 @@ public class DbLocationDialog : Window
 
         var btnBrowse = new Button
         {
-            Content = "📂 Brskaj…",
+            Content = "📂 " + TranslationService.Get("Browse"),
             Padding = new Thickness(10, 5, 10, 5),
             Margin  = new Thickness(0, 0, 6, 0)
         };
@@ -77,7 +79,7 @@ public class DbLocationDialog : Window
 
         var btnDefault = new Button
         {
-            Content = "Privzeto",
+            Content = TranslationService.Get("DefaultDb"),
             Padding = new Thickness(10, 5, 10, 5)
         };
         btnDefault.Click += (_, _) => _txPath.Text = SettingsService.DefaultDbPath;
@@ -89,12 +91,59 @@ public class DbLocationDialog : Window
         // Info label showing default path
         var info = new TextBlock
         {
-            Text     = $"Privzeto: {SettingsService.DefaultDbPath}",
+            Text     = $"{TranslationService.Get("DefaultPath", SettingsService.DefaultDbPath)}",
             FontSize = 10,
-            Margin   = new Thickness(0, 0, 0, 16)
+            Margin   = new Thickness(0, 0, 0, 10)
         };
         info.SetResourceReference(TextBlock.ForegroundProperty, "SubTextBrush");
         stack.Children.Add(info);
+
+        // ── Language selector ─────────────────────────────────────────────
+        var langHdr = new TextBlock
+        {
+            Text       = TranslationService.Get("Language"),
+            FontWeight = FontWeights.SemiBold,
+            Margin     = new Thickness(0, 0, 0, 4)
+        };
+        langHdr.SetResourceReference(TextBlock.ForegroundProperty, "AccentBrush");
+        stack.Children.Add(langHdr);
+
+        _cmbLanguage = new ComboBox
+        {
+            Margin = new Thickness(0, 0, 0, 14)
+        };
+        var langs = TranslationService.GetAvailableLanguages();
+        foreach (var (code, name) in langs)
+            _cmbLanguage.Items.Add(new { Label = name, Value = code });
+        _cmbLanguage.DisplayMemberPath = "Label";
+        _cmbLanguage.SelectedValuePath = "Value";
+        _cmbLanguage.SelectedValue = currentLanguage ?? "en";
+        stack.Children.Add(_cmbLanguage);
+
+        // Language management buttons
+        var langBtnRow = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Margin = new Thickness(0, 0, 0, 14)
+        };
+
+        var btnNewLang = new Button { Content = "➕ " + TranslationService.Get("LangNew"), Padding = new Thickness(10, 5, 10, 5), Margin = new Thickness(0, 0, 6, 0) };
+        btnNewLang.Click += BtnNewLang_Click;
+        langBtnRow.Children.Add(btnNewLang);
+
+        var btnEditLang = new Button { Content = "✏ " + TranslationService.Get("LangEdit"), Padding = new Thickness(10, 5, 10, 5), Margin = new Thickness(0, 0, 6, 0) };
+        btnEditLang.Click += BtnEditLang_Click;
+        langBtnRow.Children.Add(btnEditLang);
+
+        var btnDeleteLang = new Button { Content = "🗑 " + TranslationService.Get("LangDelete"), Padding = new Thickness(10, 5, 10, 5), Margin = new Thickness(0, 0, 6, 0) };
+        btnDeleteLang.Click += BtnDeleteLang_Click;
+        langBtnRow.Children.Add(btnDeleteLang);
+
+        var btnImportLang = new Button { Content = "📂 " + TranslationService.Get("ImportLang"), Padding = new Thickness(10, 5, 10, 5) };
+        btnImportLang.Click += BtnImportLang_Click;
+        langBtnRow.Children.Add(btnImportLang);
+
+        stack.Children.Add(langBtnRow);
 
         // Buttons
         var btnRow = new StackPanel
@@ -105,7 +154,7 @@ public class DbLocationDialog : Window
 
         var btnCancel = new Button
         {
-            Content = "Prekliči",
+            Content = TranslationService.Get("Cancel"),
             Padding = new Thickness(12, 7, 12, 7),
             Margin  = new Thickness(0, 0, 8, 0)
         };
@@ -113,7 +162,7 @@ public class DbLocationDialog : Window
 
         var btnOk = new Button
         {
-            Content = "✔ Potrdi",
+            Content = "✔ " + TranslationService.Get("ConfirmPath"),
             Padding = new Thickness(18, 7, 18, 7)
         };
         btnOk.SetResourceReference(Button.StyleProperty, "AccentButton");
@@ -129,7 +178,7 @@ public class DbLocationDialog : Window
 
         var importHdr = new TextBlock
         {
-            Text       = "Uvoz knjižnice komponent",
+            Text       = TranslationService.Get("ImportOdsTitle"),
             FontWeight = FontWeights.SemiBold,
             Margin     = new Thickness(0, 0, 0, 4)
         };
@@ -138,7 +187,7 @@ public class DbLocationDialog : Window
 
         var importSub = new TextBlock
         {
-            Text     = "Enkratni uvoz base.ods v SQLite bazo (nadomesti obstoječe komponente).",
+            Text     = TranslationService.Get("ImportOdsInfo"),
             FontSize = 11,
             Margin   = new Thickness(0, 0, 0, 8)
         };
@@ -147,7 +196,7 @@ public class DbLocationDialog : Window
 
         var btnImport = new Button
         {
-            Content = "📥 Uvozi base.ods …",
+            Content = "📥 " + TranslationService.Get("ImportOds"),
             Padding = new Thickness(14, 7, 14, 7),
             HorizontalAlignment = HorizontalAlignment.Left
         };
@@ -163,8 +212,8 @@ public class DbLocationDialog : Window
     {
         var dlg = new Microsoft.Win32.OpenFileDialog
         {
-            Filter = "ODS datoteke|*.ods|Vse datoteke|*.*",
-            Title  = "Izberi base.ods"
+            Filter = TranslationService.Get("ImportFileFilter"),
+            Title  = TranslationService.Get("SelectBaseOds")
         };
         if (dlg.ShowDialog() != true) return;
 
@@ -176,7 +225,7 @@ public class DbLocationDialog : Window
             if (errors.Count > 0 && components.Count == 0)
             {
                 System.Windows.MessageBox.Show(
-                    "(" + errors.Count + " napak)", "Napake pri uvozu",
+                    TranslationService.Get("ImportOdsErrors", errors.Count), TranslationService.Get("ErrorTitle"),
                     System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
                 return;
             }
@@ -192,11 +241,11 @@ public class DbLocationDialog : Window
             int imported = 0;
             foreach (var c in components) { db.SaveComponent(c); imported++; }
 
-            string msg = $"Uvoženo {imported} komponent.";
+            string msg = TranslationService.Get("ImportOdsDone", imported);
             if (errors.Count > 0)
-                msg += $"Opozorila ({errors.Count}):" + string.Join("", errors.Take(20));
+                msg += TranslationService.Get("ImportOdsErrors", errors.Count) + ":" + string.Join("", errors.Take(20));
             ComponentsImported = true;
-            System.Windows.MessageBox.Show(msg, "Uvoz dokončan",
+            System.Windows.MessageBox.Show(msg, TranslationService.Get("Completed"),
                 System.Windows.MessageBoxButton.OK,
                 errors.Count > 0
                     ? System.Windows.MessageBoxImage.Warning
@@ -210,8 +259,8 @@ public class DbLocationDialog : Window
         // SaveFileDialog lets user pick new OR existing .db file
         var dlg = new SaveFileDialog
         {
-            Title            = "Izberi ali ustvari datoteko baze",
-            Filter           = "SQLite baza|*.db|Vse datoteke|*.*",
+            Title            = TranslationService.Get("SelectDb"),
+            Filter           = TranslationService.Get("DbBrowseFilter"),
             FileName         = Path.GetFileName(_txPath.Text),
             InitialDirectory = Path.GetDirectoryName(_txPath.Text)
                                ?? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
@@ -227,7 +276,7 @@ public class DbLocationDialog : Window
 
         if (string.IsNullOrEmpty(path))
         {
-            MessageBox.Show("Pot ne sme biti prazna.", "Napaka",
+            MessageBox.Show(TranslationService.Get("PathRequired"), TranslationService.Get("ErrorTitle"),
                 MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
@@ -240,7 +289,7 @@ public class DbLocationDialog : Window
         string? dir = Path.GetDirectoryName(path);
         if (string.IsNullOrEmpty(dir))
         {
-            MessageBox.Show("Neveljavna pot.", "Napaka",
+            MessageBox.Show(TranslationService.Get("InvalidPath"), TranslationService.Get("ErrorTitle"),
                 MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
@@ -248,13 +297,126 @@ public class DbLocationDialog : Window
         try { Directory.CreateDirectory(dir); }
         catch (Exception ex)
         {
-            MessageBox.Show($"Mapa ne more biti ustvarjena: {ex.Message}", "Napaka",
+            MessageBox.Show(TranslationService.Get("PathCreateError", ex.Message), TranslationService.Get("ErrorTitle"),
                 MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
 
         SelectedPath = path;
+        SelectedLanguage = _cmbLanguage.SelectedValue?.ToString() ?? "en";
         DialogResult = true;
         Close();
+    }
+
+    private void RefreshLanguages()
+    {
+        _cmbLanguage.Items.Clear();
+        foreach (var (code, name) in TranslationService.GetAvailableLanguages())
+            _cmbLanguage.Items.Add(new { Label = name, Value = code });
+    }
+
+    private void BtnNewLang_Click(object s, System.Windows.RoutedEventArgs e)
+    {
+        var nameDlg = new InputDialog(TranslationService.Get("LangNewTitle"), TranslationService.Get("LangNewName"), "");
+        if (nameDlg.ShowDialog() != true) return;
+        string langName = nameDlg.InputValue.Trim();
+        if (string.IsNullOrEmpty(langName)) return;
+
+        var codeDlg = new InputDialog(TranslationService.Get("LangNewTitle"), TranslationService.Get("LangNewCode"), "");
+        if (codeDlg.ShowDialog() != true) return;
+        string langCode = codeDlg.InputValue.Trim().ToLowerInvariant();
+        if (string.IsNullOrEmpty(langCode)) return;
+
+        // Check for duplicates
+        var existing = TranslationService.GetAvailableLanguages();
+        if (existing.Any(l => l.Code.Equals(langCode, StringComparison.OrdinalIgnoreCase)))
+        {
+            MessageBox.Show(TranslationService.Get("LangCodeExists", langCode),
+                TranslationService.Get("ErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        try
+        {
+            TranslationService.CreateLanguage(langName, langCode);
+            RefreshLanguages();
+            _cmbLanguage.SelectedValue = langCode;
+            MessageBox.Show(TranslationService.Get("LangCreated", langName),
+                TranslationService.Get("Completed"), MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(TranslationService.Get("LangCreateError", ex.Message),
+                TranslationService.Get("ErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private void BtnEditLang_Click(object s, System.Windows.RoutedEventArgs e)
+    {
+        string code = _cmbLanguage.SelectedValue?.ToString() ?? "";
+        if (string.IsNullOrEmpty(code)) return;
+
+        string name = TranslationService.GetLanguageName(code);
+        var editor = new LanguageEditorDialog(code, name)
+        {
+            Owner = this
+        };
+        if (editor.ShowDialog() == true)
+        {
+            // Reload translations if editing current language
+            if (code == TranslationService.CurrentLanguage)
+                TranslationService.Load(code);
+            RefreshLanguages();
+            _cmbLanguage.SelectedValue = code;
+        }
+    }
+
+    private void BtnDeleteLang_Click(object s, System.Windows.RoutedEventArgs e)
+    {
+        string code = _cmbLanguage.SelectedValue?.ToString() ?? "";
+        if (string.IsNullOrEmpty(code)) return;
+
+        if (!TranslationService.IsUserLanguage(code))
+        {
+            MessageBox.Show(TranslationService.Get("LangDeleteBuiltIn"),
+                TranslationService.Get("WarningTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        string name = TranslationService.GetLanguageName(code);
+        if (MessageBox.Show(TranslationService.Get("LangDeleteConfirm", name),
+                TranslationService.Get("Confirmation"), MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+            return;
+
+        TranslationService.DeleteLanguage(code);
+        RefreshLanguages();
+        _cmbLanguage.SelectedValue = "en";
+    }
+
+    private void BtnImportLang_Click(object s, System.Windows.RoutedEventArgs e)
+    {
+        var dlg = new Microsoft.Win32.OpenFileDialog
+        {
+            Filter = TranslationService.Get("LangFileFilter"),
+            Title  = TranslationService.Get("ImportLangTitle")
+        };
+        if (dlg.ShowDialog() != true) return;
+
+        try
+        {
+            TranslationService.ImportLanguage(dlg.FileName);
+            // Refresh ComboBox
+            _cmbLanguage.Items.Clear();
+            foreach (var (code, name) in TranslationService.GetAvailableLanguages())
+                _cmbLanguage.Items.Add(new { Label = name, Value = code });
+            _cmbLanguage.SelectedValue = TranslationService.CurrentLanguage;
+            MessageBox.Show(TranslationService.Get("ImportLangDone", Path.GetFileNameWithoutExtension(dlg.FileName).Replace("strings.", "")),
+                TranslationService.Get("Completed"), MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(TranslationService.Get("ImportLangError", ex.Message),
+                TranslationService.Get("ErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 }

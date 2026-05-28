@@ -1,3 +1,5 @@
+using MyHobbyWarehouse.Services;
+
 namespace MyHobbyWarehouse.Models;
 
 /// <summary>
@@ -16,13 +18,13 @@ public class TransactionGroup
     public string DisplayDate  => Date.ToString("dd.MM.yyyy HH:mm");
     public string DisplayType  => PrimaryType switch
     {
-        TransactionType.BuildUse   => "Poraba (build)",
-        TransactionType.Purchase   => "Nakup",
-        TransactionType.ManualIn   => "Ročni vnos",
-        TransactionType.ManualOut  => "Ročni odvzem",
-        TransactionType.Adjustment => "Korekcija",
+        TransactionType.BuildUse   => TranslationService.Get("TypeBuildUseShort"),
+        TransactionType.Purchase   => TranslationService.Get("TypePurchaseShort"),
+        TransactionType.ManualIn   => TranslationService.Get("TypeManualInShort"),
+        TransactionType.ManualOut  => TranslationService.Get("TypeManualOutShort"),
+        TransactionType.Adjustment => TranslationService.Get("TypeAdjustmentShort"),
         _                          => PrimaryType.ToString()
     };
-    public string DisplayCount => $"{TransactionCount} komponent";
-    public string DisplayQty   => $"{TotalQtyAbs:F0} kos";
+    public string DisplayCount => TranslationService.Get("DisplayCount", TransactionCount);
+    public string DisplayQty   => TranslationService.Get("DisplayQty", TotalQtyAbs);
 }

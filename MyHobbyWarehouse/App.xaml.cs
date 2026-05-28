@@ -12,16 +12,22 @@ public partial class App : Application
 
         var settings = SettingsService.Load();
 
+        TranslationService.Load(settings.Language);
+
         // First run or DB path missing → ask user
         if (string.IsNullOrEmpty(settings.DatabasePath) || !DbPathIsValid(settings.DatabasePath))
         {
-            var dlg = new Views.DbLocationDialog(settings.DatabasePath);
+            var dlg = new Views.DbLocationDialog(settings.DatabasePath, settings.Language);
             if (dlg.ShowDialog() != true)
                 settings.DatabasePath = SettingsService.DefaultDbPath;
             else
+            {
                 settings.DatabasePath = dlg.SelectedPath;
+                settings.Language = dlg.SelectedLanguage;
+            }
 
             SettingsService.Save(settings);
+            TranslationService.Load(settings.Language);
         }
 
         _ = new DatabaseService(settings.DatabasePath);

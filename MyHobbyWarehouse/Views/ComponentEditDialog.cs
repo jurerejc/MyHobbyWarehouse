@@ -42,7 +42,7 @@ public class ComponentEditDialog : Window
 
     private void BuildUi()
     {
-        Title  = _isNew ? "Nov element" : "Uredi element";
+        Title  = _isNew ? TranslationService.Get("AddComponent") : TranslationService.Get("EditComponent");
         Width  = 760; Height = 800;
         MinHeight = 600;
         ResizeMode = ResizeMode.CanResize;
@@ -60,34 +60,34 @@ public class ComponentEditDialog : Window
         Content        = outer;
 
         // ── Identity ──────────────────────────────────────────────────────
-        stack.Children.Add(SecHdr("Identifikacija"));
+        stack.Children.Add(SecHdr(TranslationService.Get("Identity")));
         stack.Children.Add(Row4(
-            ("SKU *",     _txSku      = TB(_isNew ? "" : "nespremenljivo", !_isNew)),
-            ("Stara SKU", _txOldSku   = TB()),
-            ("Alt",       _txAlt      = TB()),
-            ("Enota",     _txUnit     = TB("pcs"))
+            (TranslationService.Get("SkuRequired"), _txSku      = TB(_isNew ? "" : TranslationService.Get("Immutable"), !_isNew)),
+            (TranslationService.Get("OldSku"),      _txOldSku   = TB()),
+            (TranslationService.Get("Alt"),         _txAlt      = TB()),
+            (TranslationService.Get("Unit"),        _txUnit     = TB("pcs"))
         ));
-        stack.Children.Add(Lbl("Opis *"));
+        stack.Children.Add(Lbl(TranslationService.Get("DescriptionRequired")));
         _txDesc = TB(); stack.Children.Add(_txDesc);
 
         // ── Zaloga ────────────────────────────────────────────────────────
-        stack.Children.Add(SecHdr("Zaloga"));
+        stack.Children.Add(SecHdr(TranslationService.Get("Stock")));
         stack.Children.Add(Row4(
-            ("Skupaj",        _txStockSum     = TB("0")),
-            ("Zadnja cena (€)",_txLastPrice   = TB("0")),
-            ("Rack",           _txStockRack   = TB("0")),
-            ("Package",        _txStockPackage= TB("0"))
+            (TranslationService.Get("Total"),          _txStockSum     = TB("0")),
+            (TranslationService.Get("LastPrice"),      _txLastPrice    = TB("0")),
+            (TranslationService.Get("StockRack"),      _txStockRack   = TB("0")),
+            (TranslationService.Get("StockPackage"),   _txStockPackage= TB("0"))
         ));
 
         // ── Fizično ───────────────────────────────────────────────────────
-        stack.Children.Add(SecHdr("Fizično"));
+        stack.Children.Add(SecHdr(TranslationService.Get("Physical")));
         var physRow = new Grid();
         physRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         physRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         var sp1 = new StackPanel { Margin = new Thickness(4) };
-        sp1.Children.Add(Lbl("Masa (mg)")); _txMassMg = TB("0"); sp1.Children.Add(_txMassMg);
+        sp1.Children.Add(Lbl(TranslationService.Get("MassMg"))); _txMassMg = TB("0"); sp1.Children.Add(_txMassMg);
         var sp2 = new StackPanel { Margin = new Thickness(4, 12, 4, 4), VerticalAlignment = VerticalAlignment.Bottom };
-        _chkSmd = new CheckBox { Content = "SMD (surface mount)" };
+        _chkSmd = new CheckBox { Content = TranslationService.Get("SmdCheck") };
         _chkSmd.SetResourceReference(ForegroundProperty, "TextBrush");
         sp2.Children.Add(_chkSmd);
         Grid.SetColumn(sp1, 0); physRow.Children.Add(sp1);
@@ -95,7 +95,7 @@ public class ComponentEditDialog : Window
         stack.Children.Add(physRow);
 
         // ── Kategorije ────────────────────────────────────────────────────
-        stack.Children.Add(SecHdr("Kategorije"));
+        stack.Children.Add(SecHdr(TranslationService.Get("Categories")));
         var allComps = _db.GetAllComponents();
         var cat1 = allComps.Select(c => c.Category1).Where(s => s != "").Distinct().OrderBy(s => s).ToList();
         var cat2 = allComps.Select(c => c.Category2).Where(s => s != "").Distinct().OrderBy(s => s).ToList();
@@ -103,31 +103,31 @@ public class ComponentEditDialog : Window
         var cat4 = allComps.Select(c => c.Category4).Where(s => s != "").Distinct().OrderBy(s => s).ToList();
         var cat5 = allComps.Select(c => c.Category5).Where(s => s != "").Distinct().OrderBy(s => s).ToList();
         stack.Children.Add(Row4CB(
-            ("Tip (Cat1)",     _cbCat1 = EditCb(cat1)),
-            ("Sub-tip (Cat2)", _cbCat2 = EditCb(cat2)),
-            ("Vrednost (Cat3)",_cbCat3 = EditCb(cat3)),
-            ("Package (Cat4)", _cbCat4 = EditCb(cat4))
+            (TranslationService.Get("TypeCat1"),     _cbCat1 = EditCb(cat1)),
+            (TranslationService.Get("SubTypeCat2"),  _cbCat2 = EditCb(cat2)),
+            (TranslationService.Get("ValueCat3"),    _cbCat3 = EditCb(cat3)),
+            (TranslationService.Get("PackageCat4"),  _cbCat4 = EditCb(cat4))
         ));
         var c5Sp = new StackPanel { Margin = new Thickness(4) };
-        c5Sp.Children.Add(Lbl("Ostalo (Cat5)")); _cbCat5 = EditCb(cat5); c5Sp.Children.Add(_cbCat5);
+        c5Sp.Children.Add(Lbl(TranslationService.Get("OtherCat5"))); _cbCat5 = EditCb(cat5); c5Sp.Children.Add(_cbCat5);
         stack.Children.Add(c5Sp);
 
         // ── Proizvajalec ──────────────────────────────────────────────────
-        stack.Children.Add(SecHdr("Proizvajalec"));
-        stack.Children.Add(Row2(("Ime", _txMfgName = TB()), ("Part #", _txMfgPart = TB())));
+        stack.Children.Add(SecHdr(TranslationService.Get("Manufacturer")));
+        stack.Children.Add(Row2((TranslationService.Get("Name"), _txMfgName = TB()), (TranslationService.Get("MfgPart"), _txMfgPart = TB())));
 
         // ── Dobavitelji ───────────────────────────────────────────────────
-        stack.Children.Add(SecHdr("Dobavitelji"));
-        stack.Children.Add(SupRow("Dobavitelj 1", ref _txS1Name, ref _txS1Sku, ref _txS1Price, ref _txS1Url));
-        stack.Children.Add(SupRow("Dobavitelj 2", ref _txS2Name, ref _txS2Sku, ref _txS2Price, ref _txS2Url));
-        stack.Children.Add(SupRow("Dobavitelj 3", ref _txS3Name, ref _txS3Sku, ref _txS3Price, ref _txS3Url));
+        stack.Children.Add(SecHdr(TranslationService.Get("Suppliers")));
+        stack.Children.Add(SupRow(TranslationService.Get("Supplier1"), ref _txS1Name, ref _txS1Sku, ref _txS1Price, ref _txS1Url));
+        stack.Children.Add(SupRow(TranslationService.Get("Supplier2"), ref _txS2Name, ref _txS2Sku, ref _txS2Price, ref _txS2Url));
+        stack.Children.Add(SupRow(TranslationService.Get("Supplier3"), ref _txS3Name, ref _txS3Sku, ref _txS3Price, ref _txS3Url));
 
         // ── Sticker ───────────────────────────────────────────────────────
-        stack.Children.Add(SecHdr("Nalepka"));
+        stack.Children.Add(SecHdr(TranslationService.Get("Sticker")));
         _txSticker = TB(); stack.Children.Add(_txSticker);
 
         // ── Slika ─────────────────────────────────────────────────────────
-        stack.Children.Add(SecHdr("Slika elementa"));
+        stack.Children.Add(SecHdr(TranslationService.Get("ComponentImage")));
         var imgGrid = new Grid();
         imgGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(340) });
         imgGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
@@ -154,24 +154,24 @@ public class ComponentEditDialog : Window
         var imgCtrl = new StackPanel { Margin = new Thickness(12, 4, 4, 4), VerticalAlignment = VerticalAlignment.Top };
         _txImgPath = new TextBlock
         {
-            Text         = "Ni slike",
+            Text         = TranslationService.Get("NoImage"),
             FontSize     = 11,
             TextWrapping = TextWrapping.Wrap,
             Margin       = new Thickness(0, 0, 0, 8)
         };
         _txImgPath.SetResourceReference(ForegroundProperty, "SubTextBrush");
 
-        var btnSelImg = new Button { Content = "📂 Izberi sliko...", Padding = new Thickness(10, 6, 10, 6), Margin = new Thickness(0, 0, 0, 6) };
+        var btnSelImg = new Button { Content = TranslationService.Get("SelectImage"), Padding = new Thickness(10, 6, 10, 6), Margin = new Thickness(0, 0, 0, 6) };
         btnSelImg.Click += BtnSelectImage_Click;
-        var btnMulti = new Button { Content = "📋 Dodeli vec elementom...", Padding = new Thickness(10, 6, 10, 6), Margin = new Thickness(0, 0, 0, 6) };
+        var btnMulti = new Button { Content = TranslationService.Get("AssignToMultiple"), Padding = new Thickness(10, 6, 10, 6), Margin = new Thickness(0, 0, 0, 6) };
         btnMulti.Click += BtnMultiAssign_Click;
-        var btnDelImg = new Button { Content = "🗑 Odstrani sliko", Padding = new Thickness(10, 6, 10, 6) };
+        var btnDelImg = new Button { Content = TranslationService.Get("DeleteImage"), Padding = new Thickness(10, 6, 10, 6) };
         btnDelImg.Style = (Style)Application.Current.Resources["DangerButton"];
         btnDelImg.Click += BtnDeleteImage_Click;
 
         var btnDelMulti = new Button
         {
-            Content = "🗑 Odstrani sliko vsem filtriranim",
+            Content = TranslationService.Get("DeleteImageFiltered"),
             Padding = new Thickness(10, 6, 10, 6),
             Margin = new Thickness(0, 6, 0, 0),
             IsEnabled = _filteredComponents != null && _filteredComponents.Count > 0
@@ -181,7 +181,7 @@ public class ComponentEditDialog : Window
 
         var fmtNote = new TextBlock
         {
-            Text = "Podprto: JPG, PNG, BMP\nShrani se v: images/{SKU}.ext",
+            Text = TranslationService.Get("ImageFormatNote"),
             FontSize = 10, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 8, 0, 0)
         };
         fmtNote.SetResourceReference(ForegroundProperty, "SubTextBrush");
@@ -202,8 +202,8 @@ public class ComponentEditDialog : Window
             HorizontalAlignment = HorizontalAlignment.Right,
             Margin = new Thickness(0, 14, 0, 0)
         };
-        var btnCancel = new Button { Content = "Prekliči", Padding = new Thickness(12, 7, 12, 7), Margin = new Thickness(0, 0, 6, 0) };
-        var btnSave   = new Button { Content = "💾 Shrani", Padding = new Thickness(18, 7, 18, 7) };
+        var btnCancel = new Button { Content = TranslationService.Get("Cancel"), Padding = new Thickness(12, 7, 12, 7), Margin = new Thickness(0, 0, 6, 0) };
+        var btnSave   = new Button { Content = TranslationService.Get("Save"), Padding = new Thickness(18, 7, 18, 7) };
         btnSave.Style = (Style)Application.Current.Resources["AccentButton"];
         btnCancel.Click += (_, _) => { DialogResult = false; Close(); };
         btnSave.Click   += Save_Click;
@@ -252,19 +252,19 @@ public class ComponentEditDialog : Window
         else
         {
             _imgPreview.Source = null;
-            _txImgPath.Text = "Ni slike";
+            _txImgPath.Text = TranslationService.Get("NoImage");
         }
     }
 
     private void BtnSelectImage_Click(object s, RoutedEventArgs e)
     {
         string sku = _isNew ? _txSku.Text.Trim() : _original!.Sku;
-        if (string.IsNullOrEmpty(sku)) { MessageBox.Show("Najprej vnesi SKU.", "Opozorilo", MessageBoxButton.OK, MessageBoxImage.Warning); return; }
+        if (string.IsNullOrEmpty(sku)) { MessageBox.Show(TranslationService.Get("EnterSkuFirst"), TranslationService.Get("Warning"), MessageBoxButton.OK, MessageBoxImage.Warning); return; }
 
         var dlg = new OpenFileDialog
         {
-            Filter = "Slike|*.jpg;*.jpeg;*.png;*.bmp|Vse datoteke|*.*",
-            Title  = "Izberi sliko elementa"
+            Filter = TranslationService.Get("ImageFileFilter"),
+            Title  = TranslationService.Get("SelectComponentImage")
         };
         if (dlg.ShowDialog() != true) return;
         ImageService.SaveImage(sku, dlg.FileName);
@@ -275,11 +275,11 @@ public class ComponentEditDialog : Window
     {
         string sku = _isNew ? _txSku.Text.Trim() : _original!.Sku;
         if (string.IsNullOrEmpty(sku))
-        { Err("Najprej vnesi SKU."); return; }
+        { Err(TranslationService.Get("EnterSkuFirst")); return; }
 
         string? imgPath = ImageService.FindImage(sku);
         if (imgPath == null)
-        { Err("Najprej dodaj sliko temu elementu, nato jo dodeli ostalim."); return; }
+        { Err(TranslationService.Get("AddImageFirst")); return; }
 
         var dlg = new MultiImageAssignDialog(imgPath, sku, _db, _filteredComponents);
         dlg.Owner = this;
@@ -292,7 +292,7 @@ public class ComponentEditDialog : Window
         if (string.IsNullOrEmpty(sku)) return;
         ImageService.DeleteImages(sku);
         _imgPreview.Source = null;
-        _txImgPath.Text = "Ni slike";
+        _txImgPath.Text = TranslationService.Get("NoImage");
     }
 
     private void BtnDeleteMulti_Click(object s, RoutedEventArgs e)
@@ -300,9 +300,9 @@ public class ComponentEditDialog : Window
         if (_filteredComponents == null || _filteredComponents.Count == 0) return;
 
         int hasImage = _filteredComponents.Count(c => ImageService.FindImage(c.Sku) != null);
-        if (hasImage == 0) { MessageBox.Show("Noben od filtriranih elementov nima slike.", "Opozorilo", MessageBoxButton.OK, MessageBoxImage.Information); return; }
+        if (hasImage == 0) { MessageBox.Show(TranslationService.Get("NoFilteredHaveImages"), TranslationService.Get("Warning"), MessageBoxButton.OK, MessageBoxImage.Information); return; }
 
-        if (MessageBox.Show($"Odstraniti sliko pri {hasImage} od {_filteredComponents.Count} filtriranih elementov?", "Potrditev", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+        if (MessageBox.Show(TranslationService.Get("DeleteImageConfirm", hasImage, _filteredComponents.Count), TranslationService.Get("Confirmation"), MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
 
         int ok = 0;
         foreach (var c in _filteredComponents)
@@ -319,17 +319,17 @@ public class ComponentEditDialog : Window
         if (ImageService.FindImage(curSku) == null)
         {
             _imgPreview.Source = null;
-            _txImgPath.Text = "Ni slike";
+            _txImgPath.Text = TranslationService.Get("NoImage");
         }
 
-        MessageBox.Show($"Slika odstranjena pri {ok} elementih.", "Dokoncano", MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBox.Show(TranslationService.Get("ImageDeletedMultiple", ok), TranslationService.Get("Completed"), MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private void Save_Click(object s, RoutedEventArgs e)
     {
         string sku = _txSku.Text.Trim();
-        if (string.IsNullOrEmpty(sku))         { Err("SKU je obvezen."); return; }
-        if (string.IsNullOrEmpty(_txDesc.Text)) { Err("Opis je obvezen."); return; }
+        if (string.IsNullOrEmpty(sku))         { Err(TranslationService.Get("SkuRequiredMsg")); return; }
+        if (string.IsNullOrEmpty(_txDesc.Text)) { Err(TranslationService.Get("DescriptionRequiredMsg")); return; }
 
         var comp = _original ?? new Component { Sku = sku };
         if (_isNew) comp.Sku = sku;
@@ -412,11 +412,11 @@ public class ComponentEditDialog : Window
             g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(w, GridUnitType.Star) });
         tName = TB(); tSku = TB(); tPrice = TB("0"); tUrl = TB();
         tUrl.PreviewMouseDoubleClick += OpenUrl;
-        tUrl.ToolTip           = "Dvojni klik = odpri v brskalniku";
+        tUrl.ToolTip           = TranslationService.Get("DoubleClickOpenUrl");
         tUrl.Cursor            = System.Windows.Input.Cursors.Hand;
         tUrl.Foreground        = (System.Windows.Media.Brush)Application.Current.Resources["AccentBrush"];
         int i = 0;
-        foreach (var (l, t) in new (string, TextBox)[] { ($"{hdr} — ime", tName), ("SKU", tSku), ("Cena (€)", tPrice), ("🔗 URL", tUrl) })
+        foreach (var (l, t) in new (string, TextBox)[] { (TranslationService.Get("SupplierNameLabel", hdr), tName), (TranslationService.Get("SupplierSku"), tSku), (TranslationService.Get("Price"), tPrice), (TranslationService.Get("SupplierUrl"), tUrl) })
         { var sp = new StackPanel { Margin = new Thickness(4) }; sp.Children.Add(Lbl(l)); sp.Children.Add(t); Grid.SetColumn(sp, i++); g.Children.Add(sp); }
         return g;
     }
@@ -439,6 +439,6 @@ public class ComponentEditDialog : Window
         e.Handled = true;
     }
 
-    private static void Err(string m) => MessageBox.Show(m, "Napaka", MessageBoxButton.OK, MessageBoxImage.Warning);
+    private static void Err(string m) => MessageBox.Show(m, TranslationService.Get("Error"), MessageBoxButton.OK, MessageBoxImage.Warning);
     private static double D(string s) => double.TryParse(s.Replace(',', '.'), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double v) ? v : 0;
 }

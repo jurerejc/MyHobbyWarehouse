@@ -32,7 +32,7 @@ public class MultiImageAssignDialog : Window
         _sourceSku  = sourceSku;
         _filteredComponents = filteredComponents;
 
-        Title  = "Dodeli sliko vec elementom";
+        Title  = TranslationService.Get("ImageAssignTitle");
         Width  = 620; Height = 660;
         MinWidth = 500; MinHeight = 400;
         ResizeMode = ResizeMode.CanResize;
@@ -77,7 +77,7 @@ public class MultiImageAssignDialog : Window
 
         info.Children.Add(new TextBlock
         {
-            Text       = "Dodeli sliko",
+            Text       = TranslationService.Get("ImageAssignHeading"),
             FontSize   = 16, FontWeight = FontWeights.SemiBold,
             Foreground = (Brush)Application.Current.Resources["AccentBrush"],
             Margin     = new Thickness(0, 0, 0, 6)
@@ -92,7 +92,7 @@ public class MultiImageAssignDialog : Window
         });
         info.Children.Add(new TextBlock
         {
-            Text       = "Za vsak izbran element se ustvari kopija slike s SKU imenom.",
+            Text       = TranslationService.Get("ImageAssignInfo"),
             FontSize   = 11,
             Foreground = (Brush)Application.Current.Resources["SubTextBrush"],
             TextWrapping = TextWrapping.Wrap,
@@ -100,7 +100,7 @@ public class MultiImageAssignDialog : Window
         });
         info.Children.Add(new TextBlock
         {
-            Text       = $"Izvor: {sourceSku}",
+            Text       = TranslationService.Get("ImageAssignSource", sourceSku),
             FontSize   = 11, FontWeight = FontWeights.SemiBold,
             Foreground = (Brush)Application.Current.Resources["TextBrush"]
         });
@@ -114,7 +114,7 @@ public class MultiImageAssignDialog : Window
         var searchRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 6) };
         searchRow.Children.Add(new TextBlock
         {
-            Text = "Iskanje:", VerticalAlignment = VerticalAlignment.Center,
+            Text = TranslationService.Get("ImageAssignSearch"), VerticalAlignment = VerticalAlignment.Center,
             Foreground = (Brush)Application.Current.Resources["SubTextBrush"],
             Margin = new Thickness(0, 0, 8, 0), FontSize = 11
         });
@@ -122,9 +122,9 @@ public class MultiImageAssignDialog : Window
         _txSearch.TextChanged += (_, _) => RefreshList();
         searchRow.Children.Add(_txSearch);
 
-        var btnSelectAll = new Button { Content = "Izberi vse", Padding = new Thickness(10, 4, 10, 4), Margin = new Thickness(0, 0, 6, 0) };
+        var btnSelectAll = new Button { Content = TranslationService.Get("ImageSelectAll"), Padding = new Thickness(10, 4, 10, 4), Margin = new Thickness(0, 0, 6, 0) };
         btnSelectAll.Click += (_, _) => SetAllChecked(true);
-        var btnClearAll = new Button { Content = "Pocisti vse", Padding = new Thickness(10, 4, 10, 4) };
+        var btnClearAll = new Button { Content = TranslationService.Get("ImageClearAll"), Padding = new Thickness(10, 4, 10, 4) };
         btnClearAll.Click += (_, _) => SetAllChecked(false);
         searchRow.Children.Add(btnSelectAll);
         searchRow.Children.Add(btnClearAll);
@@ -150,7 +150,7 @@ public class MultiImageAssignDialog : Window
             Grid.SetColumn(tb, col);
             colHdr.Children.Add(tb);
         }
-        AddHdr("", 0); AddHdr("SKU", 1); AddHdr("Opis", 2); AddHdr("Kategorija", 3);
+        AddHdr("", 0); AddHdr("SKU", 1); AddHdr(TranslationService.Get("ColDescription"), 2); AddHdr(TranslationService.Get("ImageAssignColCategory"), 3);
 
         Grid.SetRow(colHdr, 2);
         root.Children.Add(colHdr);
@@ -183,10 +183,10 @@ public class MultiImageAssignDialog : Window
         bottomPanel.Children.Add(_txResult);
 
         var btnRow = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
-        var btnCancel = new Button { Content = "Zapri", Padding = new Thickness(12, 7, 12, 7), Margin = new Thickness(0, 0, 6, 0) };
+        var btnCancel = new Button { Content = TranslationService.Get("Close"), Padding = new Thickness(12, 7, 12, 7), Margin = new Thickness(0, 0, 6, 0) };
         btnCancel.Click += (_, _) => Close();
 
-        var btnAssign = new Button { Content = "📋 Kopiraj sliko za izbrane", Padding = new Thickness(14, 7, 14, 7) };
+        var btnAssign = new Button { Content = "📋 " + TranslationService.Get("ImageAssign"), Padding = new Thickness(14, 7, 14, 7) };
         btnAssign.Style = (Style)Application.Current.Resources["AccentButton"];
         btnAssign.Click += BtnAssign_Click;
 
@@ -277,7 +277,7 @@ public class MultiImageAssignDialog : Window
             VerticalAlignment = VerticalAlignment.Center,
             TextTrimming = TextTrimming.CharacterEllipsis,
             Margin   = new Thickness(2, 0, 0, 0),
-            ToolTip  = hasImg ? "Ze ima sliko" : null
+            ToolTip  = hasImg ? TranslationService.Get("ImageAssignHasImage") : null
         };
         var tbCat = new TextBlock
         {
@@ -320,7 +320,7 @@ public class MultiImageAssignDialog : Window
     private void UpdateResultLabel()
     {
         int count = GetSelectedSkus().Count;
-        _txResult.Text = count == 0 ? "Ni izbranih" : $"Izbranih: {count} elementov";
+        _txResult.Text = count == 0 ? TranslationService.Get("ImageNoSelection") : TranslationService.Get("ImageSelected", count);
     }
 
     // ── Assign ────────────────────────────────────────────────────────────
@@ -330,13 +330,13 @@ public class MultiImageAssignDialog : Window
         var skus = GetSelectedSkus();
         if (skus.Count == 0)
         {
-            MessageBox.Show("Ni izbranih elementov.", "Opozorilo", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(TranslationService.Get("ImageAssignNoSelection"), TranslationService.Get("WarningTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
         if (!File.Exists(_sourcePath))
         {
-            MessageBox.Show($"Izvorna slika ne obstaja:\n{_sourcePath}", "Napaka",
+            MessageBox.Show(TranslationService.Get("ImageSourceMissing", _sourcePath), TranslationService.Get("ErrorTitle"),
                 MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
@@ -367,16 +367,16 @@ public class MultiImageAssignDialog : Window
         }
 
         string msg = failed == 0
-            ? $"Slika dodeljena {ok} elementom."
-            : $"Dodeljena {ok} elementom, {failed} napak.";
-        if (firstError != null) msg += $"\n\nPrva napaka: {firstError}";
+            ? TranslationService.Get("ImageAssignDone", ok)
+            : TranslationService.Get("ImageAssignPartial", ok, failed);
+        if (firstError != null) msg += "\n\n" + TranslationService.Get("ImageAssignFirstError", firstError);
 
         _txResult.Text = msg;
         _txResult.Foreground = failed == 0
             ? (Brush)Application.Current.Resources["OkBrush"]
             : (Brush)Application.Current.Resources["WarnBrush"];
 
-        MessageBox.Show(msg, "Dokoncano", MessageBoxButton.OK,
+        MessageBox.Show(msg, TranslationService.Get("ImageAssignDoneTitle"), MessageBoxButton.OK,
             failed == 0 ? MessageBoxImage.Information : MessageBoxImage.Warning);
     }
 }

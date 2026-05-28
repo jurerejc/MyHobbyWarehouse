@@ -19,13 +19,13 @@ public static class ExportService
         // Header row
         string[] headers =
         [
-            "SKU","Opis","Enota","Tip","Sub-tip","Vrednost","Package","SMD",
-            "Zaloga","Cena (€)","Vrednost zaloge (€)","Masa (mg)",
-            "Lokacija","MFG","MFG part",
-            "Dobavitelj 1","SKU 1","Cena 1","URL 1",
-            "Dobavitelj 2","SKU 2","Cena 2","URL 2",
-            "Dobavitelj 3","SKU 3","Cena 3","URL 3",
-            "Stara SKU","Alt"
+            TranslationService.Get("ExportSku"), TranslationService.Get("ExportDescription"), TranslationService.Get("ExportUnit"), TranslationService.Get("ExportType"), TranslationService.Get("ExportSubtype"), TranslationService.Get("ExportValue"), TranslationService.Get("ExportPackage"), TranslationService.Get("ExportSmd"),
+            TranslationService.Get("ExportStock"), TranslationService.Get("ExportPriceEur"), TranslationService.Get("ExportStockValueEur"), TranslationService.Get("ExportMassMg"),
+            TranslationService.Get("ExportLocation"), TranslationService.Get("ExportMfg"), TranslationService.Get("ExportMfgPart"),
+            TranslationService.Get("ExportSupplierN", 1), TranslationService.Get("ExportSupplierSku"), TranslationService.Get("ExportSupplierPrice"), TranslationService.Get("ExportSupplierUrl"),
+            TranslationService.Get("ExportSupplierN", 2), TranslationService.Get("ExportSupplierSku"), TranslationService.Get("ExportSupplierPrice"), TranslationService.Get("ExportSupplierUrl"),
+            TranslationService.Get("ExportSupplierN", 3), TranslationService.Get("ExportSupplierSku"), TranslationService.Get("ExportSupplierPrice"), TranslationService.Get("ExportSupplierUrl"),
+            TranslationService.Get("ExportOldSku"), TranslationService.Get("ExportAlt")
         ];
         for (int i = 0; i < headers.Length; i++)
         {
@@ -88,7 +88,7 @@ public static class ExportService
 
         // ---- BOM sheet ----
         var ws = wb.Worksheets.Add("BOM");
-        string[] bomHeaders = ["#","SKU","SKU2","Opis","Qty","Enota","Designatorji","Value","Device","Package"];
+        string[] bomHeaders = ["#", TranslationService.Get("ExportSku"), TranslationService.Get("ExportBomColSku2"), TranslationService.Get("ExportDescription"), TranslationService.Get("ExportBomColQty"), TranslationService.Get("ExportUnit"), TranslationService.Get("ExportBomColDesignators"), TranslationService.Get("ExportValue"), TranslationService.Get("ExportBomColDevice"), TranslationService.Get("ExportPackage")];
         for (int i = 0; i < bomHeaders.Length; i++)
         {
             ws.Cell(1, i + 1).Value = bomHeaders[i];
@@ -115,7 +115,7 @@ public static class ExportService
 
         // ---- Calculations sheet ----
         var wc = wb.Worksheets.Add("Calculations");
-        string[] calcHeaders = ["#","SKU","Opis","Qty","Enota","€/kos","€/vrstica","Masa/kos (mg)","Masa skupaj (mg)","Status","Designatorji"];
+        string[] calcHeaders = ["#", TranslationService.Get("ExportSku"), TranslationService.Get("ExportDescription"), TranslationService.Get("ExportBomColQty"), TranslationService.Get("ExportUnit"), TranslationService.Get("ExportCalcColPricePerUnit"), TranslationService.Get("ExportCalcColCostPerLine"), TranslationService.Get("ExportCalcColMassPerUnit"), TranslationService.Get("ExportCalcColTotalMass"), TranslationService.Get("ExportCalcColStatus"), TranslationService.Get("ExportBomColDesignators")];
         for (int i = 0; i < calcHeaders.Length; i++)
         {
             wc.Cell(1, i + 1).Value = calcHeaders[i];
@@ -146,7 +146,7 @@ public static class ExportService
             row++;
         }
         // Summary
-        wc.Cell(row + 1, 3).Value = "SKUPAJ";
+        wc.Cell(row + 1, 3).Value = TranslationService.Get("ExportTotal");
         wc.Cell(row + 1, 3).Style.Font.Bold = true;
         wc.Cell(row + 1, 7).Value = totalCost;
         wc.Cell(row + 1, 7).Style.Font.Bold = true;

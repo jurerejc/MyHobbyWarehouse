@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using MyHobbyWarehouse.Services;
 
 namespace MyHobbyWarehouse.Views;
 
@@ -69,7 +70,7 @@ public class FilterPopup : Window
         titleRow.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         var titleTb = new TextBlock
         {
-            Text       = $"Filter: {columnName}",
+            Text       = TranslationService.Get("FilterTitle", columnName),
             FontWeight = FontWeights.SemiBold,
             FontSize   = 12,
             Foreground = (System.Windows.Media.Brush)Application.Current.Resources["AccentBrush"],
@@ -107,7 +108,7 @@ public class FilterPopup : Window
         };
         _chkAll = new CheckBox
         {
-            Content    = "Izberi vse",
+            Content    = TranslationService.Get("SelectAll"),
             FontWeight = FontWeights.SemiBold,
             IsChecked  = true,
             Foreground = (System.Windows.Media.Brush)Application.Current.Resources["TextBrush"]
@@ -137,13 +138,13 @@ public class FilterPopup : Window
         };
         var btnClear = new Button
         {
-            Content = "Počisti filter",
+            Content = TranslationService.Get("ClearFilter"),
             Padding = new Thickness(10, 5, 10, 5),
             Margin  = new Thickness(0, 0, 6, 0)
         };
         var btnOk = new Button
         {
-            Content = "OK",
+            Content = TranslationService.Get("OkButton"),
             Padding = new Thickness(18, 5, 18, 5)
         };
         btnOk.Style = (Style)Application.Current.Resources["AccentButton"];
@@ -175,7 +176,7 @@ public class FilterPopup : Window
         {
             var chk = new CheckBox
             {
-                Content   = string.IsNullOrEmpty(v) ? "(prazno)" : v,
+                Content   = string.IsNullOrEmpty(v) ? TranslationService.Get("EmptyValue") : v,
                 Tag       = v,
                 IsChecked = _initialSelected.Contains(v),
                 Foreground = (System.Windows.Media.Brush)Application.Current.Resources["TextBrush"],

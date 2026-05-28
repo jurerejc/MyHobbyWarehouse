@@ -31,8 +31,8 @@ public static class ImportService
                 s.Name.Contains("base", StringComparison.OrdinalIgnoreCase))
                 ?? sheets.FirstOrDefault();
 
-            if (sheet == null) { errors.Add("ODS: ni veljavnega sheeta."); return (components, errors); }
-            if (sheet.Rows.Count == 0) { errors.Add("ODS: sheet je prazen."); return (components, errors); }
+            if (sheet == null) { errors.Add(TranslationService.Get("ImportOdsNoSheet")); return (components, errors); }
+            if (sheet.Rows.Count == 0) { errors.Add(TranslationService.Get("ImportOdsEmptySheet")); return (components, errors); }
 
             // First row = headers
             var headers = sheet.Rows[0]
@@ -106,13 +106,13 @@ public static class ImportService
                 }
                 catch (Exception ex)
                 {
-                    errors.Add($"Vrstica {rowIdx + 1}: {ex.Message}");
+                    errors.Add(TranslationService.Get("ImportOdsRowError", rowIdx + 1, ex.Message));
                 }
             }
         }
         catch (Exception ex)
         {
-            errors.Add($"Napaka pri branju datoteke: {ex.Message}");
+            errors.Add(TranslationService.Get("ImportFileReadError", ex.Message));
         }
 
         return (components, errors);
@@ -128,7 +128,7 @@ public static class ImportService
 
         using var zip    = ZipFile.OpenRead(filePath);
         var contentEntry = zip.GetEntry("content.xml")
-            ?? throw new InvalidDataException("content.xml ni v ODS datoteki.");
+            ?? throw new InvalidDataException(TranslationService.Get("ImportOdsNoContentXml"));
 
         XDocument doc;
         using (var stream = contentEntry.Open())
@@ -246,13 +246,13 @@ public static class ImportService
                 }
                 catch (Exception ex)
                 {
-                    errors.Add($"CSV vrstica {li + 1}: {ex.Message}");
+                    errors.Add(TranslationService.Get("ImportCsvRowError", li + 1, ex.Message));
                 }
             }
         }
         catch (Exception ex)
         {
-            errors.Add($"Napaka pri branju CSV: {ex.Message}");
+            errors.Add(TranslationService.Get("ImportCsvReadError", ex.Message));
         }
 
         // Group by primary SKU
@@ -300,7 +300,7 @@ public static class ImportService
                         ?? sheets.FirstOrDefault();
 
             if (sheet == null || sheet.Rows.Count == 0)
-            { errors.Add("ODS: ni veljavnega BOM sheeta."); return (lines, errors); }
+            { errors.Add(TranslationService.Get("ImportOdsNoBomSheet")); return (lines, errors); }
 
             // First row = headers
             var headers = sheet.Rows[0]
@@ -336,13 +336,13 @@ public static class ImportService
                 }
                 catch (Exception ex)
                 {
-                    errors.Add($"Vrstica {rowIdx + 1}: {ex.Message}");
+                    errors.Add(TranslationService.Get("ImportOdsRowError", rowIdx + 1, ex.Message));
                 }
             }
         }
         catch (Exception ex)
         {
-            errors.Add($"Napaka pri branju ODS: {ex.Message}");
+            errors.Add(TranslationService.Get("ImportOdsReadError", ex.Message));
         }
 
         return (lines, errors);
