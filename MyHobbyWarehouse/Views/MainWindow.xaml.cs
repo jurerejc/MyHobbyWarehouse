@@ -184,6 +184,48 @@ public partial class MainWindow : Window
     private void GridComponents_DoubleClick(object s, MouseButtonEventArgs e)
         => BtnEditComponent_Click(s, e);
 
+    private void GridComponents_ToolTipOpening(object s, ToolTipEventArgs e)
+    {
+        var dep = e.OriginalSource as DependencyObject;
+        while (dep != null && dep is not DataGridRow) dep = System.Windows.Media.VisualTreeHelper.GetParent(dep);
+        var row = dep as DataGridRow;
+        if (row?.DataContext is not Models.Component comp) return;
+        var panel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(4) };
+        string? compImg = ImageService.FindImage(comp.Sku);
+        if (compImg != null)
+        {
+            var img = new System.Windows.Controls.Image
+            {
+                Source = ImageService.LoadBitmap(compImg),
+                Width = 200,
+                Stretch = System.Windows.Media.Stretch.Uniform,
+                Margin = new Thickness(0, 0, 4, 0)
+            };
+            panel.Children.Add(img);
+        }
+        if (!string.IsNullOrEmpty(comp.LocationCode))
+        {
+            string? locImg = ImageService.FindLocationImage(comp.LocationCode);
+            if (locImg != null)
+            {
+                var img = new System.Windows.Controls.Image
+                {
+                    Source = ImageService.LoadBitmap(locImg),
+                    Width = 200,
+                    Stretch = System.Windows.Media.Stretch.Uniform,
+                };
+                panel.Children.Add(img);
+            }
+        }
+        if (panel.Children.Count > 0)
+            row.ToolTip = new ToolTip { Content = panel };
+        else
+        {
+            row.ToolTip = null;
+            e.Handled = true;
+        }
+    }
+
     private void ShowComponentDetail(Models.Component c)
     {
         PanelComponentDetail.Visibility = Visibility.Visible;        TxtDetailSku.Text   = $"SKU: {c.Sku}  |  Stara SKU: {c.OldSku}  |  Alt: {c.Alt}";

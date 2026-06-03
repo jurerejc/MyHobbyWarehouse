@@ -134,7 +134,8 @@
                               SelectionChanged="GridComponents_SelectionChanged"
                               MouseDoubleClick="GridComponents_DoubleClick"
                               PreviewMouseMove="Grid_PreviewMouseMove"
-                              MouseLeave="Grid_MouseLeave">
+                               MouseLeave="Grid_MouseLeave"
+                               ToolTipOpening="GridComponents_ToolTipOpening">
                         <DataGrid.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="{conv:Translate AddToProjectMenuItem}"
