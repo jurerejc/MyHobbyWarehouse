@@ -190,18 +190,33 @@ public partial class MainWindow : Window
         while (dep != null && dep is not DataGridRow) dep = System.Windows.Media.VisualTreeHelper.GetParent(dep);
         var row = dep as DataGridRow;
         if (row?.DataContext is not Models.Component comp) return;
+        var panel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(4) };
         string? compImg = ImageService.FindImage(comp.Sku);
         if (compImg != null)
         {
-            var img = new System.Windows.Controls.Image
+            panel.Children.Add(new System.Windows.Controls.Image
             {
                 Source = ImageService.LoadBitmap(compImg),
                 Width = 200,
                 Stretch = System.Windows.Media.Stretch.Uniform,
-                Margin = new Thickness(4)
-            };
-            row.ToolTip = new ToolTip { Content = img };
+                Margin = new Thickness(0, 0, 4, 0)
+            });
         }
+        if (!string.IsNullOrEmpty(comp.LocationCode))
+        {
+            string? locImg = ImageService.FindLocationImage(comp.LocationCode);
+            if (locImg != null)
+            {
+                panel.Children.Add(new System.Windows.Controls.Image
+                {
+                    Source = ImageService.LoadBitmap(locImg),
+                    Width = 200,
+                    Stretch = System.Windows.Media.Stretch.Uniform,
+                });
+            }
+        }
+        if (panel.Children.Count > 0)
+            row.ToolTip = new ToolTip { Content = panel };
         else
         {
             row.ToolTip = null;
