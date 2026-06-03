@@ -242,6 +242,7 @@
 
   "ImagePopupTitle": "Image",
   "ImageFormats": "Supported: JPG, PNG, BMP\nSaved as: images/{{SKU}}.ext",
+  "ImageFileFilter": "Image files (*.jpg,*.jpeg,*.png,*.bmp)|*.jpg;*.jpeg;*.png;*.bmp|All files|*.*",
   "SelectImage": "Select image...",
   "AssignToMultiple": "Assign to multiple items...",
   "RemoveImage": "Remove image",

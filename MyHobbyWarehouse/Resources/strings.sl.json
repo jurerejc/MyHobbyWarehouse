@@ -242,6 +242,7 @@
 
   "ImagePopupTitle": "Slika",
   "ImageFormats": "Podprto: JPG, PNG, BMP\nShrani se v: images/{SKU}.ext",
+  "ImageFileFilter": "Slikovne datoteke (*.jpg,*.jpeg,*.png,*.bmp)|*.jpg;*.jpeg;*.png;*.bmp|Vse datoteke|*.*",
   "SelectImage": "Izberi sliko...",
   "AssignToMultiple": "Dodeli več elementom...",
   "RemoveImage": "Odstrani sliko",
