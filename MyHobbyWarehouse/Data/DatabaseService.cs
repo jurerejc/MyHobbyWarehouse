@@ -807,6 +807,16 @@ public class DatabaseService
     public int SaveLocation(Location loc)
     {
         using var c = Connect();
+        // If new, check if code already exists → update instead of crash
+        if (loc.Id == 0)
+        {
+            using var check = c.CreateCommand();
+            check.CommandText = "SELECT Id FROM Locations WHERE Code = @code";
+            check.Parameters.AddWithValue("@code", loc.Code);
+            var existingId = check.ExecuteScalar();
+            if (existingId != null)
+                loc.Id = Convert.ToInt32(existingId);
+        }
         using var cmd = c.CreateCommand();
         if (loc.Id == 0)
         {
