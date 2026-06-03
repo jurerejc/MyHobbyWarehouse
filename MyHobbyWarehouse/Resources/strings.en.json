@@ -365,6 +365,7 @@
   "StatsComponents": "Components: ",
   "StatsStockValue": "Stock value: ",
   "StatsProjects": "Projects: ",
+  "LocationsTooltip": "Manage storage locations",
   "BackupTooltip": "Archive database backup",
   "SettingsTooltip": "Settings (database location)",
   "CtrlFHint": "Ctrl+F = search",

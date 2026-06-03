@@ -81,37 +81,13 @@ public class ComponentEditDialog : Window
         // Location picker
         var locRow = new StackPanel { Margin = new Thickness(4) };
         locRow.Children.Add(Lbl(TranslationService.Get("Location")));
-        var locInner = new Grid();
-        locInner.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-        locInner.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         _locations = _db.GetAllLocations();
         _cbLocation = new ComboBox
         {
-            Margin = new Thickness(0, 0, 4, 0),
             DisplayMemberPath = "Code",
             ItemsSource = _locations
         };
-        var btnManageLoc = new Button
-        {
-            Content = TranslationService.Get("ManageLocations"),
-            Padding = new Thickness(10, 4, 10, 4)
-        };
-        btnManageLoc.Click += (_, _) =>
-        {
-            var dlg = new LocationEditDialog(_db);
-            dlg.Owner = this;
-            if (dlg.ShowDialog() == true) { }
-            _locations = _db.GetAllLocations();
-            _cbLocation.ItemsSource = _locations;
-            if (_cbLocation.SelectedItem is Location sel)
-            {
-                var match = _locations.FirstOrDefault(l => l.Id == sel.Id);
-                if (match != null) _cbLocation.SelectedItem = match;
-            }
-        };
-        Grid.SetColumn(_cbLocation, 0); locInner.Children.Add(_cbLocation);
-        Grid.SetColumn(btnManageLoc, 1); locInner.Children.Add(btnManageLoc);
-        locRow.Children.Add(locInner);
+        locRow.Children.Add(_cbLocation);
         stack.Children.Add(locRow);
 
         // ── Fizično ───────────────────────────────────────────────────────

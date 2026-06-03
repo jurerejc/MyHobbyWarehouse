@@ -356,6 +356,7 @@
   "StatsComponents": "Komponent: ",
   "StatsStockValue": "Vrednost zaloge: ",
   "StatsProjects": "Projektov: ",
+  "LocationsTooltip": "Upravljanje lokacij",
   "BackupTooltip": "Arhivska kopija baze",
   "SettingsTooltip": "Nastavitve (lokacija baze)",
   "CtrlFHint": "Ctrl+F = iskanje",

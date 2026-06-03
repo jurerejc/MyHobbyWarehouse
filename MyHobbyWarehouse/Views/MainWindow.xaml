@@ -57,7 +57,9 @@
                             <TextBlock x:Name="TxtStatProjects" Foreground="{StaticResource AccentBrush}" FontWeight="SemiBold"/>
                         </StackPanel>
                     </Border>
-                    <Button Content="{conv:Translate Backup}" ToolTip="{conv:Translate BackupTooltip}" Margin="8,0,0,0"
+                    <Button Content="{conv:Translate Locations}" ToolTip="{conv:Translate LocationsTooltip}" Margin="8,0,0,0"
+                            Click="BtnLocations_Click"/>
+                    <Button Content="{conv:Translate Backup}" ToolTip="{conv:Translate BackupTooltip}" Margin="4,0,0,0"
                             Click="BtnBackup_Click"/>
                     <Button Content="⚙" ToolTip="{conv:Translate SettingsTooltip}" Margin="4,0,0,0"
                             Padding="8,4" Click="BtnSettings_Click"

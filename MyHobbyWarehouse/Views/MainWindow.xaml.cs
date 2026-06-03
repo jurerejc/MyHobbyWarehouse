@@ -574,6 +574,15 @@ public partial class MainWindow : Window
 
     // ── Helpers ──────────────────────────────────────────────────────────────
 
+    private void BtnLocations_Click(object s, RoutedEventArgs e)
+    {
+        var dlg = new LocationEditDialog(_db);
+        dlg.Owner = this;
+        dlg.ShowDialog();
+        // Refresh components so location codes are up-to-date
+        LoadComponents();
+    }
+
     private void BtnSettings_Click(object s, RoutedEventArgs e)
     {
         var settings = MyHobbyWarehouse.Services.SettingsService.Load();
