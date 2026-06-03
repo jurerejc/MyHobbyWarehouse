@@ -227,6 +227,18 @@ public class LocationEditDialog : Window
             return;
         }
 
+        // Check duplicate code on new location
+        var allLocs = _db.GetAllLocations();
+        var existing = allLocs.FirstOrDefault(l =>
+            l.Code.Equals(code, StringComparison.OrdinalIgnoreCase) &&
+            (!_editingId.HasValue || l.Id != _editingId.Value));
+        if (existing != null)
+        {
+            MessageBox.Show(TranslationService.Get("LocationCodeExists", existing.Code, existing.Description),
+                TranslationService.Get("WarningTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
         var loc = new Location { Code = code, Description = _txDesc.Text.Trim() };
         if (_editingId.HasValue) loc.Id = _editingId.Value;
 
