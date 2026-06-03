@@ -187,7 +187,8 @@ public partial class MainWindow : Window
     private void ShowComponentDetail(Models.Component c)
     {
         PanelComponentDetail.Visibility = Visibility.Visible;        TxtDetailSku.Text   = $"SKU: {c.Sku}  |  Stara SKU: {c.OldSku}  |  Alt: {c.Alt}";
-        TxtDetailDesc.Text  = c.Description;        TxtDetailStock.Text = TranslationService.Get("DetailStock", c.StockSum, c.Unit, c.StockRack, c.StockPackage);        TxtDetailPrice.Text = TranslationService.Get("DetailPrice", c.LastPrice, c.StockValue, c.MassMg);
+        TxtDetailDesc.Text  = c.Description;        string locPart = !string.IsNullOrEmpty(c.DisplayLocation) ? $"  ({c.DisplayLocation})" : "";
+        TxtDetailStock.Text = TranslationService.Get("DetailStock", c.StockSum, c.Unit) + locPart;        TxtDetailPrice.Text = TranslationService.Get("DetailPrice", c.LastPrice, c.StockValue, c.MassMg);
         TxtDetailSupp1.Text = !string.IsNullOrEmpty(c.Supplier1Name)            ? TranslationService.Get("DetailSupplier", 1, c.Supplier1Name, c.Supplier1Sku, c.Supplier1Price) +              (!string.IsNullOrEmpty(c.Supplier1Url) ? $"  🔗 {c.Supplier1Url}" : "") : "";
         TxtDetailSupp2.Text = !string.IsNullOrEmpty(c.Supplier2Name)            ? TranslationService.Get("DetailSupplier", 2, c.Supplier2Name, c.Supplier2Sku, c.Supplier2Price) +              (!string.IsNullOrEmpty(c.Supplier2Url) ? $"  🔗 {c.Supplier2Url}" : "") : "";
         TxtDetailSupp3.Text = !string.IsNullOrEmpty(c.Supplier3Name)            ? TranslationService.Get("DetailSupplier", 3, c.Supplier3Name, c.Supplier3Sku, c.Supplier3Price) +              (!string.IsNullOrEmpty(c.Supplier3Url) ? $"  🔗 {c.Supplier3Url}" : "") : "";

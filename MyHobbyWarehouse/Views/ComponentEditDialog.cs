@@ -18,7 +18,8 @@ public class ComponentEditDialog : Window
     private TextBox  _txSku=null!, _txOldSku=null!, _txAlt=null!;
     private TextBox  _txDesc=null!, _txUnit=null!;
     private TextBox  _txStockSum=null!, _txLastPrice=null!;
-    private TextBox  _txStockRack=null!, _txStockPackage=null!;
+    private ComboBox _cbLocation=null!;
+    private List<Location> _locations = [];
     private TextBox  _txMassMg=null!;
     private CheckBox _chkSmd=null!;
     private ComboBox _cbCat1=null!, _cbCat2=null!, _cbCat3=null!,
@@ -72,12 +73,46 @@ public class ComponentEditDialog : Window
 
         // ── Zaloga ────────────────────────────────────────────────────────
         stack.Children.Add(SecHdr(TranslationService.Get("Stock")));
-        stack.Children.Add(Row4(
+        stack.Children.Add(Row2(
             (TranslationService.Get("Total"),          _txStockSum     = TB("0")),
-            (TranslationService.Get("LastPrice"),      _txLastPrice    = TB("0")),
-            (TranslationService.Get("StockRack"),      _txStockRack   = TB("0")),
-            (TranslationService.Get("StockPackage"),   _txStockPackage= TB("0"))
+            (TranslationService.Get("LastPrice"),      _txLastPrice    = TB("0"))
         ));
+
+        // Location picker
+        var locRow = new StackPanel { Margin = new Thickness(4) };
+        locRow.Children.Add(Lbl(TranslationService.Get("Location")));
+        var locInner = new Grid();
+        locInner.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        locInner.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        _locations = _db.GetAllLocations();
+        _cbLocation = new ComboBox
+        {
+            Margin = new Thickness(0, 0, 4, 0),
+            DisplayMemberPath = "Code",
+            ItemsSource = _locations
+        };
+        var btnManageLoc = new Button
+        {
+            Content = TranslationService.Get("ManageLocations"),
+            Padding = new Thickness(10, 4, 10, 4)
+        };
+        btnManageLoc.Click += (_, _) =>
+        {
+            var dlg = new LocationEditDialog(_db);
+            dlg.Owner = this;
+            if (dlg.ShowDialog() == true) { }
+            _locations = _db.GetAllLocations();
+            _cbLocation.ItemsSource = _locations;
+            if (_cbLocation.SelectedItem is Location sel)
+            {
+                var match = _locations.FirstOrDefault(l => l.Id == sel.Id);
+                if (match != null) _cbLocation.SelectedItem = match;
+            }
+        };
+        Grid.SetColumn(_cbLocation, 0); locInner.Children.Add(_cbLocation);
+        Grid.SetColumn(btnManageLoc, 1); locInner.Children.Add(btnManageLoc);
+        locRow.Children.Add(locInner);
+        stack.Children.Add(locRow);
 
         // ── Fizično ───────────────────────────────────────────────────────
         stack.Children.Add(SecHdr(TranslationService.Get("Physical")));
@@ -221,8 +256,8 @@ public class ComponentEditDialog : Window
         _txUnit.Text         = c.Unit;
         _txStockSum.Text     = c.StockSum.ToString("F0");
         _txLastPrice.Text    = c.LastPrice.ToString("F4");
-        _txStockRack.Text    = c.StockRack.ToString();
-        _txStockPackage.Text = c.StockPackage.ToString();
+        if (c.LocationId.HasValue)
+            _cbLocation.SelectedItem = _locations.FirstOrDefault(l => l.Id == c.LocationId.Value);
         _txMassMg.Text       = c.MassMg.ToString("F0");
         _chkSmd.IsChecked    = c.Smd;
         _cbCat1.Text = c.Category1; _cbCat2.Text = c.Category2;
@@ -338,7 +373,7 @@ public class ComponentEditDialog : Window
         comp.Unit = string.IsNullOrEmpty(_txUnit.Text) ? "pcs" : _txUnit.Text.Trim();
         comp.StockSum = D(_txStockSum.Text); comp.LastPrice = D(_txLastPrice.Text);
         comp.StockValue = comp.StockSum * comp.LastPrice;
-        comp.StockRack = (int)D(_txStockRack.Text); comp.StockPackage = (int)D(_txStockPackage.Text);
+        comp.LocationId = (_cbLocation.SelectedItem as Location)?.Id;
         comp.MassMg = D(_txMassMg.Text); comp.Smd = _chkSmd.IsChecked == true;
         comp.Category1 = CbT(_cbCat1); comp.Category2 = CbT(_cbCat2);
         comp.Category3 = CbT(_cbCat3); comp.Category4 = CbT(_cbCat4); comp.Category5 = CbT(_cbCat5);

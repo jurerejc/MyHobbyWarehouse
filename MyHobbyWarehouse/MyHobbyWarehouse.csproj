@@ -8,7 +8,7 @@
     <UseWPF>true</UseWPF>
     <AssemblyName>MyHobbyWarehouse</AssemblyName>
     <RootNamespace>MyHobbyWarehouse</RootNamespace>
-    <Version>1.0</Version>
+    <Version>1.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

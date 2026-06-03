@@ -120,6 +120,54 @@ public class DatabaseService
             catch { /* column already exists */ }
         }
 
+        // ════════════════════════════════════════════════════════════════════
+        //  Locations table & migration
+        // ════════════════════════════════════════════════════════════════════
+        Exec(c, @"
+            CREATE TABLE IF NOT EXISTS Locations (
+                Id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                Code        TEXT NOT NULL UNIQUE,
+                Description TEXT NOT NULL DEFAULT ''
+            );");
+
+        try { Exec(c, "ALTER TABLE Components ADD COLUMN LocationId INTEGER NULL REFERENCES Locations(Id)"); }
+        catch { /* column already exists */ }
+
+        // One-time migration: create Location records from existing StockRack/StockPackage
+        long existingLocCount = Scalar<long>(c, "SELECT COUNT(*) FROM Locations");
+        if (existingLocCount == 0)
+        {
+            using var migCmd = c.CreateCommand();
+            migCmd.CommandText = @"
+                SELECT DISTINCT StockRack, StockPackage FROM Components
+                WHERE StockRack > 0 OR StockPackage > 0
+                ORDER BY StockRack, StockPackage";
+            using var migR = migCmd.ExecuteReader();
+            var inserts = new List<(int Rack, int Pkg)>();
+            while (migR.Read())
+                inserts.Add((I(migR, "StockRack"), I(migR, "StockPackage")));
+
+            foreach (var (rack, pkg) in inserts)
+            {
+                string code = $"R{rack}" + (pkg > 0 ? $"-P{pkg}" : "");
+                using var ins = c.CreateCommand();
+                ins.CommandText = "INSERT OR IGNORE INTO Locations (Code, Description) VALUES (@code, @desc)";
+                ins.Parameters.AddWithValue("@code", code);
+                ins.Parameters.AddWithValue("@desc", code);
+                ins.ExecuteNonQuery();
+
+                using var upd = c.CreateCommand();
+                upd.CommandText = @"
+                    UPDATE Components SET LocationId = (
+                        SELECT Id FROM Locations WHERE Code = @code
+                    ) WHERE StockRack = @rack AND StockPackage = @pkg";
+                upd.Parameters.AddWithValue("@code", code);
+                upd.Parameters.AddWithValue("@rack", rack);
+                upd.Parameters.AddWithValue("@pkg",  pkg);
+                upd.ExecuteNonQuery();
+            }
+        }
+
         Exec(c, @"
             CREATE TABLE IF NOT EXISTS StockTransactions (
                 Id                   INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -163,6 +211,7 @@ public class DatabaseService
 
         using var r = cmd.ExecuteReader();
         while (r.Read()) list.Add(ReadComponent(r));
+        PopulateLocationCodes(list);
         return list;
     }
 
@@ -173,7 +222,9 @@ public class DatabaseService
         cmd.CommandText = "SELECT * FROM Components WHERE Sku = @sku";
         cmd.Parameters.AddWithValue("@sku", sku);
         using var r = cmd.ExecuteReader();
-        return r.Read() ? ReadComponent(r) : null;
+        var comp = r.Read() ? ReadComponent(r) : null;
+        if (comp != null) PopulateLocationCode(comp);
+        return comp;
     }
 
     public bool ComponentExists(string sku)
@@ -207,10 +258,23 @@ public class DatabaseService
         using var c = Connect();
         using var cmd = c.CreateCommand();
         cmd.CommandText = @"
-            INSERT INTO Components VALUES (
+            INSERT INTO Components (
+                Sku,OldSku,Alt,Description,Unit,
+                StockSum,Stock,StockRfu1,StockRfu2,StockRfu3,StockRfu4,
+                StockRack,StockPackage,StockZone,LocationId,
+                LastPrice,StockValue,SupCount,LastSupplier,LastSupplierSku,
+                MassMg,Smd,
+                Category1,Category2,Category3,Category4,Category5,
+                ManufacturerName,ManufacturerPart,
+                Supplier1Name,Supplier1Sku,Supplier1Price,
+                Supplier2Name,Supplier2Sku,Supplier2Price,
+                Supplier3Name,Supplier3Sku,Supplier3Price,
+                Supplier1Url,Supplier2Url,Supplier3Url,
+                StickerText
+            ) VALUES (
                 @Sku,@OldSku,@Alt,@Description,@Unit,
                 @StockSum,@Stock,@StockRfu1,@StockRfu2,@StockRfu3,@StockRfu4,
-                @StockRack,@StockPackage,@StockZone,
+                @StockRack,@StockPackage,@StockZone,@LocationId,
                 @LastPrice,@StockValue,@SupCount,@LastSupplier,@LastSupplierSku,
                 @MassMg,@Smd,
                 @Cat1,@Cat2,@Cat3,@Cat4,@Cat5,
@@ -227,6 +291,7 @@ public class DatabaseService
                 StockRfu1=@StockRfu1,StockRfu2=@StockRfu2,
                 StockRfu3=@StockRfu3,StockRfu4=@StockRfu4,
                 StockRack=@StockRack,StockPackage=@StockPackage,StockZone=@StockZone,
+                LocationId=@LocationId,
                 LastPrice=@LastPrice,StockValue=@StockValue,
                 SupCount=@SupCount,LastSupplier=@LastSupplier,LastSupplierSku=@LastSupplierSku,
                 MassMg=@MassMg,Smd=@Smd,
@@ -595,6 +660,7 @@ public class DatabaseService
         StockRack       = I(r,"StockRack"),
         StockPackage    = I(r,"StockPackage"),
         StockZone       = I(r,"StockZone"),
+        LocationId      = r["LocationId"] == DBNull.Value ? null : I(r,"LocationId"),
         LastPrice       = D(r,"LastPrice"),
         StockValue      = D(r,"StockValue"),
         SupCount        = I(r,"SupCount"),
@@ -685,6 +751,7 @@ public class DatabaseService
         cmd.Parameters.AddWithValue("@StockRack",    x.StockRack);
         cmd.Parameters.AddWithValue("@StockPackage", x.StockPackage);
         cmd.Parameters.AddWithValue("@StockZone",    x.StockZone);
+        cmd.Parameters.AddWithValue("@LocationId",  (object?)x.LocationId ?? DBNull.Value);
         cmd.Parameters.AddWithValue("@LastPrice",    x.LastPrice);
         cmd.Parameters.AddWithValue("@StockValue",   x.StockValue);
         cmd.Parameters.AddWithValue("@SupCount",     x.SupCount);
@@ -712,6 +779,94 @@ public class DatabaseService
         cmd.Parameters.AddWithValue("@S2Url",   x.Supplier2Url);
         cmd.Parameters.AddWithValue("@S3Url",   x.Supplier3Url);
         cmd.Parameters.AddWithValue("@Sticker", x.StickerText);
+    }
+
+    // ── Locations ────────────────────────────────────────────────────────────
+
+    public List<Location> GetAllLocations()
+    {
+        var list = new List<Location>();
+        using var c = Connect();
+        using var cmd = c.CreateCommand();
+        cmd.CommandText = "SELECT * FROM Locations ORDER BY Code";
+        using var r = cmd.ExecuteReader();
+        while (r.Read()) list.Add(ReadLocation(r));
+        return list;
+    }
+
+    public Location? GetLocation(int id)
+    {
+        using var c = Connect();
+        using var cmd = c.CreateCommand();
+        cmd.CommandText = "SELECT * FROM Locations WHERE Id = @id";
+        cmd.Parameters.AddWithValue("@id", id);
+        using var r = cmd.ExecuteReader();
+        return r.Read() ? ReadLocation(r) : null;
+    }
+
+    public int SaveLocation(Location loc)
+    {
+        using var c = Connect();
+        using var cmd = c.CreateCommand();
+        if (loc.Id == 0)
+        {
+            cmd.CommandText = "INSERT INTO Locations (Code, Description) VALUES (@code, @desc); SELECT last_insert_rowid();";
+        }
+        else
+        {
+            cmd.CommandText = "UPDATE Locations SET Code=@code, Description=@desc WHERE Id=@id; SELECT @id;";
+            cmd.Parameters.AddWithValue("@id", loc.Id);
+        }
+        cmd.Parameters.AddWithValue("@code", loc.Code);
+        cmd.Parameters.AddWithValue("@desc", loc.Description);
+        return Convert.ToInt32(cmd.ExecuteScalar());
+    }
+
+    public void DeleteLocation(int id)
+    {
+        using var c = Connect();
+        // Clear references on components
+        Exec(c, $"UPDATE Components SET LocationId = NULL WHERE LocationId = {id}");
+        Exec(c, $"DELETE FROM Locations WHERE Id = {id}");
+    }
+
+    private static Location ReadLocation(SqliteDataReader r) => new()
+    {
+        Id          = I(r, "Id"),
+        Code        = S(r, "Code"),
+        Description = S(r, "Description"),
+    };
+
+    private Dictionary<int, string> GetLocationCodeMap()
+    {
+        var dict = new Dictionary<int, string>();
+        using var c = Connect();
+        using var cmd = c.CreateCommand();
+        cmd.CommandText = "SELECT Id, Code FROM Locations";
+        using var r = cmd.ExecuteReader();
+        while (r.Read()) dict[I(r, "Id")] = S(r, "Code");
+        return dict;
+    }
+
+    private void PopulateLocationCodes(List<Component> list)
+    {
+        var locMap = GetLocationCodeMap();
+        foreach (var comp in list)
+        {
+            if (comp.LocationId.HasValue && locMap.TryGetValue(comp.LocationId.Value, out var code))
+                comp.LocationCode = code;
+        }
+    }
+
+    private void PopulateLocationCode(Component comp)
+    {
+        if (!comp.LocationId.HasValue) return;
+        using var c = Connect();
+        using var cmd = c.CreateCommand();
+        cmd.CommandText = "SELECT Code FROM Locations WHERE Id = @id";
+        cmd.Parameters.AddWithValue("@id", comp.LocationId.Value);
+        var code = cmd.ExecuteScalar();
+        comp.LocationCode = code?.ToString() ?? "";
     }
 
     // ── Tiny helpers ─────────────────────────────────────────────────────────

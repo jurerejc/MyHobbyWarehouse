@@ -23,6 +23,8 @@ public partial class Component : ObservableObject
     [ObservableProperty] private int    _stockRack;
     [ObservableProperty] private int    _stockPackage;
     [ObservableProperty] private int    _stockZone;
+    public int? LocationId { get; set; }
+    public string LocationCode { get; set; } = string.Empty;
 
     // Pricing
     [ObservableProperty] private double _lastPrice;
@@ -72,9 +74,11 @@ public partial class Component : ObservableObject
     public string DisplayStock     => $"{StockSum:F0} {Unit}";
     public string DisplayPrice     => LastPrice  > 0 ? TranslationService.Get("DisplayPriceFormat", LastPrice)  : TranslationService.Get("ValueNone");
     public string DisplayValue     => StockValue > 0 ? TranslationService.Get("DisplayValueFormat", StockValue) : TranslationService.Get("ValueNone");
-    public string DisplayLocation  => StockRack  > 0
-        ? $"R{StockRack}" + (StockPackage > 0 ? $"-P{StockPackage}" : "")
-        : "";
+    public string DisplayLocation  => !string.IsNullOrEmpty(LocationCode)
+        ? LocationCode
+        : StockRack > 0
+            ? $"R{StockRack}" + (StockPackage > 0 ? $"-P{StockPackage}" : "")
+            : "";
     public string DisplaySmd       => Smd ? TranslationService.Get("SmdLabel") : TranslationService.Get("ThLabel");
     public string DisplayCategory  => string.Join(TranslationService.Get("CategorySeparator"),
         new[] { Category1, Category2, Category3, Category4 }
