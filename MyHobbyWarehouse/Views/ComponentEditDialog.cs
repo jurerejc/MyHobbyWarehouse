@@ -109,7 +109,7 @@ public class ComponentEditDialog : Window
         };
         locImgBorder.SetResourceReference(Border.BorderBrushProperty, "BorderBrush");
         locImgBorder.SetResourceReference(Border.BackgroundProperty, "CardBrush");
-        locImgBorder.MouseDoubleClick += (_, _) => ShowLocationImagePopup(locImgBorder);
+        locImgBorder.MouseDown += (_, e) => { if (e.ClickCount == 2) ShowLocationImagePopup(locImgBorder); };
         locImgBorder.Cursor = System.Windows.Input.Cursors.Hand;
         Grid.SetRow(locImgBorder, 1); Grid.SetColumn(locImgBorder, 1);
         locGrid.Children.Add(locImgBorder);
