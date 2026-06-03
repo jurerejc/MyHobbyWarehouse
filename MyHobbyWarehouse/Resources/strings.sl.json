@@ -437,6 +437,7 @@
   "Locations": "Lokacije",
   "LocationCodeRequired": "Koda lokacije je obvezna.",
   "LocationDeleteConfirm": "Izbriši lokacijo '{0}'?\nKomponente na tej lokaciji bodo izgubile povezavo do lokacije.",
+  "SelectComponentImage": "Izberi sliko elementa",
   "SelectLocationImage": "Izberi sliko lokacije",
   "ManageLocations": "Upravljaj...",
   "LocNoImage": "Ni slike",

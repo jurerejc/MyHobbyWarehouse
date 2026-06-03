@@ -446,6 +446,7 @@
   "Locations": "Locations",
   "LocationCodeRequired": "Location code is required.",
   "LocationDeleteConfirm": "Delete location '{0}'?\nComponents linked to this location will lose their location reference.",
+  "SelectComponentImage": "Select component image",
   "SelectLocationImage": "Select location image",
   "ManageLocations": "Manage...",
   "LocNoImage": "No image",
