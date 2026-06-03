@@ -109,7 +109,11 @@ public class ComponentEditDialog : Window
         };
         locImgBorder.SetResourceReference(Border.BorderBrushProperty, "BorderBrush");
         locImgBorder.SetResourceReference(Border.BackgroundProperty, "CardBrush");
-        locImgBorder.MouseDown += (_, e) => { if (e.ClickCount == 2) ShowLocationImagePopup(locImgBorder); };
+        var scale = new System.Windows.Media.ScaleTransform(1, 1);
+        locImgBorder.RenderTransform = scale;
+        locImgBorder.RenderTransformOrigin = new Point(0.5, 0.5);
+        locImgBorder.MouseEnter += (_, _) => { scale.ScaleX = 2.5; scale.ScaleY = 2.5; };
+        locImgBorder.MouseLeave += (_, _) => { scale.ScaleX = 1.0; scale.ScaleY = 1.0; };
         locImgBorder.Cursor = System.Windows.Input.Cursors.Hand;
         Grid.SetRow(locImgBorder, 1); Grid.SetColumn(locImgBorder, 1);
         locGrid.Children.Add(locImgBorder);
@@ -294,35 +298,6 @@ public class ComponentEditDialog : Window
             _imgLocation.Source = null;
             border.Visibility = Visibility.Collapsed;
         }
-    }
-
-    private void ShowLocationImagePopup(Border border)
-    {
-        var loc = _cbLocation.SelectedItem as Location;
-        if (loc == null || string.IsNullOrEmpty(loc.Code)) return;
-        string? path = ImageService.FindLocationImage(loc.Code);
-        if (path == null) return;
-        var bmp = ImageService.LoadBitmapFresh(path);
-        var img = new System.Windows.Controls.Image
-        {
-            Source = bmp,
-            MaxWidth = SystemParameters.WorkArea.Width * 0.8,
-            MaxHeight = SystemParameters.WorkArea.Height * 0.8,
-            Stretch = System.Windows.Media.Stretch.Uniform,
-            Margin = new Thickness(8)
-        };
-        var win = new Window
-        {
-            Title = $"{loc.Code} — {loc.Description}",
-            Content = img,
-            SizeToContent = SizeToContent.WidthAndHeight,
-            WindowStartupLocation = WindowStartupLocation.CenterOwner,
-            Owner = this,
-            ResizeMode = ResizeMode.NoResize,
-            WindowStyle = WindowStyle.ToolWindow,
-            MinWidth = 200, MinHeight = 150,
-        };
-        win.ShowDialog();
     }
 
     private void LoadImagePreview(string sku)
