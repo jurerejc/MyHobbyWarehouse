@@ -109,6 +109,8 @@ public class ComponentEditDialog : Window
         };
         locImgBorder.SetResourceReference(Border.BorderBrushProperty, "BorderBrush");
         locImgBorder.SetResourceReference(Border.BackgroundProperty, "CardBrush");
+        locImgBorder.MouseDoubleClick += (_, _) => ShowLocationImagePopup(locImgBorder);
+        locImgBorder.Cursor = System.Windows.Input.Cursors.Hand;
         Grid.SetRow(locImgBorder, 1); Grid.SetColumn(locImgBorder, 1);
         locGrid.Children.Add(locImgBorder);
         _cbLocation.SelectionChanged += (_, _) => LoadLocationThumbnail(locImgBorder);
@@ -292,6 +294,35 @@ public class ComponentEditDialog : Window
             _imgLocation.Source = null;
             border.Visibility = Visibility.Collapsed;
         }
+    }
+
+    private void ShowLocationImagePopup(Border border)
+    {
+        var loc = _cbLocation.SelectedItem as Location;
+        if (loc == null || string.IsNullOrEmpty(loc.Code)) return;
+        string? path = ImageService.FindLocationImage(loc.Code);
+        if (path == null) return;
+        var bmp = ImageService.LoadBitmapFresh(path);
+        var img = new System.Windows.Controls.Image
+        {
+            Source = bmp,
+            MaxWidth = SystemParameters.WorkArea.Width * 0.8,
+            MaxHeight = SystemParameters.WorkArea.Height * 0.8,
+            Stretch = System.Windows.Media.Stretch.Uniform,
+            Margin = new Thickness(8)
+        };
+        var win = new Window
+        {
+            Title = $"{loc.Code} — {loc.Description}",
+            Content = img,
+            SizeToContent = SizeToContent.WidthAndHeight,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Owner = this,
+            ResizeMode = ResizeMode.NoResize,
+            WindowStyle = WindowStyle.ToolWindow,
+            MinWidth = 200, MinHeight = 150,
+        };
+        win.ShowDialog();
     }
 
     private void LoadImagePreview(string sku)
