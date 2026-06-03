@@ -205,7 +205,7 @@
                                 </DataGridTextColumn.Header>
                             </DataGridTextColumn>
 
-                            <DataGridTextColumn Binding="{Binding DisplaySmd}" Width="60">
+                            <DataGridTextColumn Binding="{Binding DisplaySmd, Mode=OneWay}" Width="60">
                                 <DataGridTextColumn.Header>
                                     <DockPanel Tag="DisplaySmd">
                                         <Button DockPanel.Dock="Right" x:Name="FBtnSmd"
@@ -217,7 +217,7 @@
                                 </DataGridTextColumn.Header>
                             </DataGridTextColumn>
 
-                            <DataGridTextColumn Binding="{Binding DisplayStock}" Width="75">
+                            <DataGridTextColumn Binding="{Binding DisplayStock, Mode=OneWay}" Width="75">
                                 <DataGridTextColumn.Header>
                                     <DockPanel Tag="StockBucket">
                                         <Button DockPanel.Dock="Right" x:Name="FBtnStock"
@@ -229,7 +229,7 @@
                                 </DataGridTextColumn.Header>
                             </DataGridTextColumn>
 
-                            <DataGridTextColumn Binding="{Binding DisplayPrice}" Width="80">
+                            <DataGridTextColumn Binding="{Binding DisplayPrice, Mode=OneWay}" Width="80">
                                 <DataGridTextColumn.Header>
                                     <DockPanel Tag="DisplayPrice">
                                         <Button DockPanel.Dock="Right" x:Name="FBtnCena"
@@ -241,9 +241,9 @@
                                 </DataGridTextColumn.Header>
                             </DataGridTextColumn>
 
-                            <DataGridTextColumn Header="{conv:Translate ColStockValue}" Binding="{Binding DisplayValue}" Width="90"/>
+                            <DataGridTextColumn Header="{conv:Translate ColStockValue}" Binding="{Binding DisplayValue, Mode=OneWay}" Width="90"/>
 
-                            <DataGridTextColumn Binding="{Binding DisplayLocation}" Width="70">
+                            <DataGridTextColumn Binding="{Binding DisplayLocation, Mode=OneWay}" Width="70">
                                 <DataGridTextColumn.Header>
                                     <DockPanel Tag="DisplayLocation">
                                         <Button DockPanel.Dock="Right" x:Name="FBtnLoc"
