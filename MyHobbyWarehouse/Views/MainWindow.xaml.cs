@@ -202,17 +202,21 @@ public partial class MainWindow : Window
                 Margin = new Thickness(0, 0, 4, 0)
             });
         }
-        if (!string.IsNullOrEmpty(comp.LocationCode))
+        if (comp.LocationId.HasValue)
         {
-            string? locImg = ImageService.FindLocationImage(comp.LocationCode);
-            if (locImg != null)
+            var loc = _db.GetLocation(comp.LocationId.Value);
+            if (loc != null)
             {
-                panel.Children.Add(new System.Windows.Controls.Image
+                string? locImg = ImageService.FindLocationImage(loc.Code);
+                if (locImg != null)
                 {
-                    Source = ImageService.LoadBitmap(locImg),
-                    Width = 200,
-                    Stretch = System.Windows.Media.Stretch.Uniform,
-                });
+                    panel.Children.Add(new System.Windows.Controls.Image
+                    {
+                        Source = ImageService.LoadBitmap(locImg),
+                        Width = 200,
+                        Stretch = System.Windows.Media.Stretch.Uniform,
+                    });
+                }
             }
         }
         if (panel.Children.Count > 0)
