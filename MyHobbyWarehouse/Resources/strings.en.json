@@ -246,6 +246,7 @@
   "SelectImage": "Select image...",
   "AssignToMultiple": "Assign to multiple items...",
   "RemoveImage": "Remove image",
+  "DeleteImage": "Delete image",
   "RemoveImagesFiltered": "Remove image from all filtered",
   "SelectImageFirst": "First add an image to this item, then assign to others.",
   "EnterSkuFirst": "Enter SKU first.",

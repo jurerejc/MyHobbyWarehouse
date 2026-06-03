@@ -82,6 +82,23 @@ public static class ImageService
         }
     }
 
+    /// <summary>Loads a BitmapImage from a file using a memory stream to avoid WPF URI caching.</summary>
+    public static BitmapImage? LoadBitmapFresh(string path)
+    {
+        try
+        {
+            var bmp = new BitmapImage();
+            bmp.BeginInit();
+            bmp.StreamSource = new MemoryStream(File.ReadAllBytes(path));
+            bmp.CacheOption = BitmapCacheOption.OnLoad;
+            bmp.DecodePixelWidth = 320;
+            bmp.EndInit();
+            bmp.Freeze();
+            return bmp;
+        }
+        catch { return null; }
+    }
+
     /// <summary>Loads a BitmapImage from a file path.</summary>
     public static BitmapImage? LoadBitmap(string path)
     {

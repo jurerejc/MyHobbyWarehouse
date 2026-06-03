@@ -246,6 +246,7 @@
   "SelectImage": "Izberi sliko...",
   "AssignToMultiple": "Dodeli več elementom...",
   "RemoveImage": "Odstrani sliko",
+  "DeleteImage": "Briši sliko",
   "RemoveImagesFiltered": "Odstrani sliko vsem filtriranim",
   "SelectImageFirst": "Najprej dodaj sliko temu elementu, nato jo dodeli ostalim.",
   "EnterSkuFirst": "Najprej vnesi SKU.",
