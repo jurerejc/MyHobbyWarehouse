@@ -30,6 +30,7 @@ public class ComponentEditDialog : Window
     private TextBox  _txS3Name=null!, _txS3Sku=null!, _txS3Price=null!, _txS3Url=null!;
     private TextBox  _txSticker=null!;
     private System.Windows.Controls.Image _imgPreview=null!;
+    private System.Windows.Controls.Image _imgLocation=null!;
     private TextBlock _txImgPath=null!;
 
     public ComponentEditDialog(Component? comp, DatabaseService db, List<Component>? filteredComponents = null)
@@ -79,15 +80,39 @@ public class ComponentEditDialog : Window
         ));
 
         // Location picker
-        var locRow = new StackPanel { Margin = new Thickness(4) };
-        locRow.Children.Add(Lbl(TranslationService.Get("Location")));
+        var locGrid = new Grid { Margin = new Thickness(4) };
+        locGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        locGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        locGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        locGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        locGrid.Children.Add(Lbl(TranslationService.Get("Location")));
         _locations = _db.GetAllLocations();
         _cbLocation = new ComboBox
         {
-            ItemsSource = _locations
+            ItemsSource = _locations,
+            Margin = new Thickness(0, 0, 6, 0)
         };
-        locRow.Children.Add(_cbLocation);
-        stack.Children.Add(locRow);
+        Grid.SetRow(_cbLocation, 1); Grid.SetColumn(_cbLocation, 0);
+        locGrid.Children.Add(_cbLocation);
+        _imgLocation = new System.Windows.Controls.Image
+        {
+            Width = 100, Height = 75,
+            Stretch = System.Windows.Media.Stretch.Uniform,
+            StretchDirection = System.Windows.Controls.StretchDirection.Both
+        };
+        var locImgBorder = new Border
+        {
+            Child = _imgLocation,
+            Width = 104, Height = 79,
+            BorderThickness = new Thickness(1),
+            Visibility = Visibility.Collapsed
+        };
+        locImgBorder.SetResourceReference(Border.BorderBrushProperty, "BorderBrush");
+        locImgBorder.SetResourceReference(Border.BackgroundProperty, "CardBrush");
+        Grid.SetRow(locImgBorder, 1); Grid.SetColumn(locImgBorder, 1);
+        locGrid.Children.Add(locImgBorder);
+        _cbLocation.SelectionChanged += (_, _) => LoadLocationThumbnail(locImgBorder);
+        stack.Children.Add(locGrid);
 
         // ── Fizično ───────────────────────────────────────────────────────
         stack.Children.Add(SecHdr(TranslationService.Get("Physical")));
@@ -248,6 +273,25 @@ public class ComponentEditDialog : Window
 
         // Load image
         LoadImagePreview(c.Sku);
+    }
+
+    private void LoadLocationThumbnail(Border border)
+    {
+        var loc = _cbLocation.SelectedItem as Location;
+        if (loc == null || string.IsNullOrEmpty(loc.Code))
+        { _imgLocation.Source = null; border.Visibility = Visibility.Collapsed; return; }
+        string? path = ImageService.FindLocationImage(loc.Code);
+        if (path != null)
+        {
+            var bmp = ImageService.LoadBitmapFresh(path);
+            _imgLocation.Source = bmp;
+            border.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            _imgLocation.Source = null;
+            border.Visibility = Visibility.Collapsed;
+        }
     }
 
     private void LoadImagePreview(string sku)
