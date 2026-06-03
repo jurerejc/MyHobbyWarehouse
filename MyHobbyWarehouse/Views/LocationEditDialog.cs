@@ -56,8 +56,9 @@ public class LocationEditDialog : Window
         _lstLocations = new ListBox
         {
             Margin = new Thickness(0, 0, 0, 4),
-            DisplayMemberPath = "DisplayName"
         };
+        _lstLocations.SetResourceReference(ForegroundProperty, "TextBrush");
+        _lstLocations.ItemTemplate = CreateLocationTemplate();
         _lstLocations.SelectionChanged += LstLocations_SelectionChanged;
         leftPanel.Children.Add(_lstLocations);
 
@@ -148,12 +149,9 @@ public class LocationEditDialog : Window
     private void RefreshList()
     {
         var locs = _db.GetAllLocations();
-        _lstLocations.ItemsSource = locs;
-        _lstLocations.DisplayMemberPath = "Code";
         foreach (var loc in locs)
-        {
             loc.HasImage = ImageService.FindLocationImage(loc.Code) != null;
-        }
+        _lstLocations.ItemsSource = locs;
     }
 
     private void LstLocations_SelectionChanged(object s, SelectionChangedEventArgs e)
@@ -200,13 +198,14 @@ public class LocationEditDialog : Window
         var loc = new Location { Code = code, Description = _txDesc.Text.Trim() };
         if (_editingId.HasValue) loc.Id = _editingId.Value;
 
-        _db.SaveLocation(loc);
+        int savedId = _db.SaveLocation(loc);
+        _editingId = savedId;
         RefreshList();
 
         // Select the saved/updated location
         foreach (var item in _lstLocations.Items)
         {
-            if (item is Location l && l.Id == (_editingId ?? 0))
+            if (item is Location l && l.Id == savedId)
             {
                 _lstLocations.SelectedItem = item;
                 break;
@@ -267,6 +266,23 @@ public class LocationEditDialog : Window
     {
         _imgPreview.Source = null;
         _txImgPath.Text = TranslationService.Get("NoImage");
+    }
+
+    private static DataTemplate CreateLocationTemplate()
+    {
+        var spFactory = new FrameworkElementFactory(typeof(StackPanel));
+        var codeFactory = new FrameworkElementFactory(typeof(TextBlock));
+        codeFactory.SetValue(TextBlock.FontWeightProperty, FontWeights.SemiBold);
+        codeFactory.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("Code"));
+        spFactory.AppendChild(codeFactory);
+
+        var descFactory = new FrameworkElementFactory(typeof(TextBlock));
+        descFactory.SetValue(TextBlock.FontSizeProperty, 11.0);
+        descFactory.SetResourceReference(TextBlock.ForegroundProperty, "SubTextBrush");
+        descFactory.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("Description"));
+        spFactory.AppendChild(descFactory);
+
+        return new DataTemplate { VisualTree = spFactory };
     }
 
     private static TextBlock Label(string text) => new()
