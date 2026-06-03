@@ -208,11 +208,18 @@ public partial class MainWindow : Window
             if (loc != null)
             {
                 string? locImg = ImageService.FindLocationImage(loc.Code);
+                panel.Children.Add(new TextBlock
+                {
+                    Text = $"Location: {loc.Code}  Img: {locImg ?? "(null)"}",
+                    FontSize = 11,
+                    VerticalAlignment = System.Windows.VerticalAlignment.Center,
+                    Margin = new Thickness(4)
+                });
                 if (locImg != null)
                 {
                     panel.Children.Add(new System.Windows.Controls.Image
                     {
-                        Source = ImageService.LoadBitmap(locImg),
+                        Source = ImageService.LoadBitmapFresh(locImg),
                         Width = 200,
                         Stretch = System.Windows.Media.Stretch.Uniform,
                     });
