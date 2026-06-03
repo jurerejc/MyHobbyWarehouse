@@ -43,8 +43,11 @@ public class LocationEditDialog : Window
         mainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(4, GridUnitType.Star) });
 
         // ── Left: location list ────────────────────────────────────────────
-        var leftPanel = new StackPanel { Margin = new Thickness(0, 0, 8, 0) };
-        leftPanel.Children.Add(new TextBlock
+        var leftGrid = new Grid { Margin = new Thickness(0, 0, 8, 0) };
+        leftGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        leftGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+        leftGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        leftGrid.Children.Add(new TextBlock
         {
             Text = TranslationService.Get("Locations"),
             FontWeight = FontWeights.SemiBold,
@@ -79,7 +82,8 @@ public class LocationEditDialog : Window
             Width = new DataGridLength(2, DataGridLengthUnitType.Star)
         });
         _gridLocations.SelectionChanged += GridLocations_SelectionChanged;
-        leftPanel.Children.Add(_gridLocations);
+        Grid.SetRow(_gridLocations, 1);
+        leftGrid.Children.Add(_gridLocations);
 
         var btnRow = new StackPanel { Orientation = Orientation.Horizontal };
         var btnNew = new Button { Content = TranslationService.Get("AddNewLocation"), Padding = new Thickness(8, 4, 8, 4), Margin = new Thickness(0, 0, 4, 0) };
@@ -94,9 +98,10 @@ public class LocationEditDialog : Window
         _btnDelete.Click += BtnDelete_Click;
         btnRow.Children.Add(btnNew);
         btnRow.Children.Add(_btnDelete);
-        leftPanel.Children.Add(btnRow);
-        Grid.SetColumn(leftPanel, 0);
-        mainGrid.Children.Add(leftPanel);
+        Grid.SetRow(btnRow, 2);
+        leftGrid.Children.Add(btnRow);
+        Grid.SetColumn(leftGrid, 0);
+        mainGrid.Children.Add(leftGrid);
 
         // ── Right: edit panel ──────────────────────────────────────────────
         var rightPanel = new StackPanel { Margin = new Thickness(8, 0, 0, 0) };
