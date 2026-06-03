@@ -6,4 +6,6 @@ public class Location
     public string Code { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public bool HasImage { get; set; }
+
+    public override string ToString() => $"{Code}, {Description}";
 }

@@ -84,7 +84,6 @@ public class ComponentEditDialog : Window
         _locations = _db.GetAllLocations();
         _cbLocation = new ComboBox
         {
-            DisplayMemberPath = "Code",
             ItemsSource = _locations
         };
         locRow.Children.Add(_cbLocation);
