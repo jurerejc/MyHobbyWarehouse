@@ -807,16 +807,6 @@ public class DatabaseService
     public int SaveLocation(Location loc)
     {
         using var c = Connect();
-        // If new, check if code already exists → update instead of crash
-        if (loc.Id == 0)
-        {
-            using var check = c.CreateCommand();
-            check.CommandText = "SELECT Id FROM Locations WHERE Code = @code";
-            check.Parameters.AddWithValue("@code", loc.Code);
-            var existingId = check.ExecuteScalar();
-            if (existingId != null)
-                loc.Id = Convert.ToInt32(existingId);
-        }
         using var cmd = c.CreateCommand();
         if (loc.Id == 0)
         {
@@ -832,10 +822,15 @@ public class DatabaseService
         return Convert.ToInt32(cmd.ExecuteScalar());
     }
 
+    public int GetComponentCountForLocation(int locationId)
+    {
+        using var c = Connect();
+        return Scalar<int>(c, $"SELECT COUNT(*) FROM Components WHERE LocationId = {locationId}");
+    }
+
     public void DeleteLocation(int id)
     {
         using var c = Connect();
-        // Clear references on components
         Exec(c, $"UPDATE Components SET LocationId = NULL WHERE LocationId = {id}");
         Exec(c, $"DELETE FROM Locations WHERE Id = {id}");
     }

@@ -14,8 +14,8 @@ public class LocationEditDialog : Window
     private DataGrid _gridLocations = null!;
     private TextBox _txCode = null!, _txDesc = null!;
     private System.Windows.Controls.Image _imgPreview = null!;
-    private TextBlock _txImgPath = null!;
-    private Button _btnDelete = null!, _btnDeleteImg = null!;
+    private TextBlock _txImgPath = null!, _txtHeader = null!;
+    private Button _btnDelete = null!, _btnDeleteImg = null!, _btnSave = null!;
     private int? _editingId;
 
     public LocationEditDialog(DatabaseService db)
@@ -42,7 +42,7 @@ public class LocationEditDialog : Window
         mainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(3, GridUnitType.Star) });
         mainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(4, GridUnitType.Star) });
 
-        // ── Left: location DataGrid ────────────────────────────────────────
+        // ── Left: location list ────────────────────────────────────────────
         var leftPanel = new StackPanel { Margin = new Thickness(0, 0, 8, 0) };
         leftPanel.Children.Add(new TextBlock
         {
@@ -59,8 +59,7 @@ public class LocationEditDialog : Window
             HeadersVisibility = DataGridHeadersVisibility.Column,
             Margin = new Thickness(0, 0, 0, 4),
             RowHeight = 28,
-            AlternatingRowBackground =
-                (System.Windows.Media.Brush)Application.Current.Resources["CardBrush"] ?? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x1A, 0x27, 0x33)),
+            AlternatingRowBackground = (System.Windows.Media.Brush)Application.Current.Resources["CardBrush"],
             BorderThickness = new Thickness(1),
             SelectionMode = DataGridSelectionMode.Single,
         };
@@ -83,7 +82,7 @@ public class LocationEditDialog : Window
         leftPanel.Children.Add(_gridLocations);
 
         var btnRow = new StackPanel { Orientation = Orientation.Horizontal };
-        var btnNew = new Button { Content = TranslationService.Get("New"), Padding = new Thickness(8, 4, 8, 4), Margin = new Thickness(0, 0, 4, 0) };
+        var btnNew = new Button { Content = TranslationService.Get("AddNewLocation"), Padding = new Thickness(8, 4, 8, 4), Margin = new Thickness(0, 0, 4, 0) };
         btnNew.Click += (_, _) => NewLocation();
         _btnDelete = new Button
         {
@@ -101,13 +100,14 @@ public class LocationEditDialog : Window
 
         // ── Right: edit panel ──────────────────────────────────────────────
         var rightPanel = new StackPanel { Margin = new Thickness(8, 0, 0, 0) };
-        rightPanel.Children.Add(new TextBlock
+        _txtHeader = new TextBlock
         {
-            Text = TranslationService.Get("LocationDetails"),
+            Text = TranslationService.Get("AddNewLocation"),
             FontWeight = FontWeights.SemiBold,
-            Margin = new Thickness(0, 0, 0, 4),
+            Margin = new Thickness(0, 0, 0, 6),
             Foreground = (System.Windows.Media.Brush)Application.Current.Resources["AccentBrush"]
-        });
+        };
+        rightPanel.Children.Add(_txtHeader);
 
         rightPanel.Children.Add(Label(TranslationService.Get("LocationCode")));
         _txCode = new TextBox { Margin = new Thickness(0, 0, 0, 4) };
@@ -117,7 +117,7 @@ public class LocationEditDialog : Window
         _txDesc = new TextBox { Margin = new Thickness(0, 0, 0, 8) };
         rightPanel.Children.Add(_txDesc);
 
-        // Image preview
+        // Image
         var imgBorder = new Border
         {
             Width = 200, Height = 140,
@@ -158,17 +158,16 @@ public class LocationEditDialog : Window
         imgBtnRow.Children.Add(_btnDeleteImg);
         rightPanel.Children.Add(imgBtnRow);
 
-        // Save
-        var btnSave = new Button
+        _btnSave = new Button
         {
             Content = TranslationService.Get("Save"),
             Padding = new Thickness(18, 7, 18, 7),
             Margin = new Thickness(0, 10, 0, 0),
             HorizontalAlignment = HorizontalAlignment.Right
         };
-        btnSave.Style = (Style)Application.Current.Resources["AccentButton"];
-        btnSave.Click += BtnSave_Click;
-        rightPanel.Children.Add(btnSave);
+        _btnSave.Style = (Style)Application.Current.Resources["AccentButton"];
+        _btnSave.Click += BtnSave_Click;
+        rightPanel.Children.Add(_btnSave);
 
         Grid.SetColumn(rightPanel, 1);
         mainGrid.Children.Add(rightPanel);
@@ -192,6 +191,7 @@ public class LocationEditDialog : Window
             _editingId = loc.Id;
             _txCode.Text = loc.Code;
             _txDesc.Text = loc.Description;
+            _txtHeader.Text = TranslationService.Get("EditLocation");
             _btnDelete.IsEnabled = true;
             LoadLocationImage(loc.Code);
         }
@@ -200,6 +200,7 @@ public class LocationEditDialog : Window
             _editingId = null;
             _txCode.Text = "";
             _txDesc.Text = "";
+            _txtHeader.Text = TranslationService.Get("AddNewLocation");
             _btnDelete.IsEnabled = false;
             ClearImagePreview();
         }
@@ -210,6 +211,7 @@ public class LocationEditDialog : Window
         _editingId = null;
         _txCode.Text = "";
         _txDesc.Text = "";
+        _txtHeader.Text = TranslationService.Get("AddNewLocation");
         _btnDelete.IsEnabled = false;
         _btnDeleteImg.IsEnabled = false;
         ClearImagePreview();
@@ -227,7 +229,7 @@ public class LocationEditDialog : Window
             return;
         }
 
-        // Check duplicate code on new location
+        // Check duplicate code
         var allLocs = _db.GetAllLocations();
         var existing = allLocs.FirstOrDefault(l =>
             l.Code.Equals(code, StringComparison.OrdinalIgnoreCase) &&
@@ -244,6 +246,7 @@ public class LocationEditDialog : Window
 
         int savedId = _db.SaveLocation(loc);
         _editingId = savedId;
+        _txtHeader.Text = TranslationService.Get("EditLocation");
         RefreshList();
 
         foreach (var item in _gridLocations.Items)
@@ -259,9 +262,10 @@ public class LocationEditDialog : Window
     private void BtnDelete_Click(object s, RoutedEventArgs e)
     {
         if (_gridLocations.SelectedItem is not Location loc) return;
-        if (MessageBox.Show(
-            TranslationService.Get("LocationDeleteConfirm", loc.Code),
-            TranslationService.Get("Confirmation"),
+
+        int compCount = _db.GetComponentCountForLocation(loc.Id);
+        string msg = TranslationService.Get("LocationDeleteConfirm", loc.Code, compCount);
+        if (MessageBox.Show(msg, TranslationService.Get("Confirmation"),
             MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
 
         _db.DeleteLocation(loc.Id);
