@@ -22,6 +22,8 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         _db = DatabaseService.Current!;
+        var v = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+        Title = $"{TranslationService.Get("AppTitle")}  v{v!.Major}.{v.Minor}";
         Loaded += (_, _) => Initialize();
     }
 
