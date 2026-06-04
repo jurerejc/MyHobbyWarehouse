@@ -16,7 +16,7 @@
   "ImportCsv": "Import (CSV)",
   "StockCheck": "Check stock",
   "BuildPcb": "Build PCB",
-  "ExportBom": "Export BOM",
+  "ExportBom": "Export BOM (XLSX)",
   "AddToProject": "Add to project",
   "AddBomLine": "Add BOM line",
   "DeleteBomLine": "Delete BOM line",

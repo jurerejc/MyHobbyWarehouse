@@ -16,7 +16,7 @@
   "ImportCsv": "Uvozi (CSV)",
   "StockCheck": "Preveri zalogo",
   "BuildPcb": "Odštej sestavo PCBja",
-  "ExportBom": "Izvozi BOM",
+  "ExportBom": "Izvozi BOM (XLSX)",
   "AddToProject": "Dodaj na projekt",
   "AddBomLine": "Dodaj BOM vrstico",
   "DeleteBomLine": "Izbriši BOM vrstico",
