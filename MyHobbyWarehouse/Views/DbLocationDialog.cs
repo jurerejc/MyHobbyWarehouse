@@ -201,7 +201,7 @@ public class DbLocationDialog : Window
                 var appInfo = db.GetAppInfo();
                 _txAppName.Text = appInfo.Name;
                 _txAppDesc.Text = appInfo.Description;
-                _txLogoPath.Text = appInfo.LogoPath;
+                _txLogoPath.Text = ImageService.FindLogoImage() != null ? "✓ " + TranslationService.Get("LogoSet") : "";
             }
         }
         catch { /* DB not yet initialized */ }
@@ -387,7 +387,10 @@ public class DbLocationDialog : Window
                 var info = db.GetAppInfo();
                 info.Name = _txAppName.Text.Trim();
                 info.Description = _txAppDesc.Text.Trim();
-                info.LogoPath = _txLogoPath.Text.Trim();
+                string logoPath = _txLogoPath.Text.Trim();
+                if (!string.IsNullOrEmpty(logoPath))
+                    ImageService.SaveLogoImage(logoPath);
+                info.LogoPath = ImageService.FindLogoImage() != null ? "1" : "";
                 db.SaveAppInfo(info);
             }
         }

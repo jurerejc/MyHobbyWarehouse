@@ -455,5 +455,6 @@
   "AppDescription": "Opis / podnaslov programa",
   "AppLogo": "Logotip",
   "SelectAppLogo": "Izberi logotip programa",
-  "LogoBrowseFilter": "Slike|*.png;*.jpg;*.jpeg;*.bmp;*.gif|Vse datoteke|*.*"
+  "LogoBrowseFilter": "Slike|*.png;*.jpg;*.jpeg;*.bmp;*.gif|Vse datoteke|*.*",
+  "LogoSet": "Logotip je nastavljen"
 }

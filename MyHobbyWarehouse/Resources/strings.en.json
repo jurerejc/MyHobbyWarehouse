@@ -464,5 +464,6 @@
   "AppDescription": "App description / subtitle",
   "AppLogo": "Logo image",
   "SelectAppLogo": "Select app logo",
-  "LogoBrowseFilter": "Image files|*.png;*.jpg;*.jpeg;*.bmp;*.gif|All files|*.*"
+  "LogoBrowseFilter": "Image files|*.png;*.jpg;*.jpeg;*.bmp;*.gif|All files|*.*",
+  "LogoSet": "Logo is set"
 }

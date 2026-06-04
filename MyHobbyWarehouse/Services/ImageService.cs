@@ -82,6 +82,38 @@ public static class ImageService
         }
     }
 
+    /// <summary>Returns the logo image path if it exists, else null.</summary>
+    public static string? FindLogoImage()
+    {
+        foreach (var ext in new[] { ".jpg", ".jpeg", ".png", ".bmp" })
+        {
+            string path = Path.Combine(ImagesFolder, "logo" + ext);
+            if (File.Exists(path)) return path;
+        }
+        return null;
+    }
+
+    /// <summary>Copies source image to images folder as logo{ext}.</summary>
+    public static string SaveLogoImage(string sourcePath)
+    {
+        Directory.CreateDirectory(ImagesFolder);
+        string ext  = Path.GetExtension(sourcePath).ToLowerInvariant();
+        string dest = Path.Combine(ImagesFolder, "logo" + ext);
+        DeleteLogoImage();
+        File.Copy(sourcePath, dest, overwrite: true);
+        return dest;
+    }
+
+    /// <summary>Deletes the logo image file.</summary>
+    public static void DeleteLogoImage()
+    {
+        foreach (var ext in new[] { ".jpg", ".jpeg", ".png", ".bmp" })
+        {
+            string p = Path.Combine(ImagesFolder, "logo" + ext);
+            if (File.Exists(p)) File.Delete(p);
+        }
+    }
+
     /// <summary>Loads a BitmapImage from a file using a memory stream to avoid WPF URI caching.</summary>
     public static BitmapImage? LoadBitmapFresh(string path)
     {
