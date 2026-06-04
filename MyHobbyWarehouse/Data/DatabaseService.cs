@@ -90,7 +90,8 @@ public class DatabaseService
                 Description  TEXT NOT NULL DEFAULT '',
                 Notes        TEXT NOT NULL DEFAULT '',
                 CreatedDate  TEXT NOT NULL,
-                ModifiedDate TEXT NOT NULL
+                ModifiedDate TEXT NOT NULL,
+                HasImage     INTEGER NOT NULL DEFAULT 0
             );");
 
         Exec(c, @"
@@ -111,6 +112,8 @@ public class DatabaseService
 
         // Migration: add new columns if upgrading
         try { Exec(c, "ALTER TABLE Projects ADD COLUMN Version TEXT NOT NULL DEFAULT ''"); }
+        catch { /* already exists */ }
+        try { Exec(c, "ALTER TABLE Projects ADD COLUMN HasImage INTEGER NOT NULL DEFAULT 0"); }
         catch { /* already exists */ }
 
         // Migration: add URL columns if upgrading from older schema
@@ -375,15 +378,15 @@ public class DatabaseService
         if (p.Id == 0)
         {
             cmd.CommandText = @"
-                INSERT INTO Projects (Name,BoardName,Version,Revision,Description,Notes,CreatedDate,ModifiedDate)
-                VALUES (@Name,@Board,@Ver,@Rev,@Desc,@Notes,@Created,@Modified);
+                INSERT INTO Projects (Name,BoardName,Version,Revision,Description,Notes,CreatedDate,ModifiedDate,HasImage)
+                VALUES (@Name,@Board,@Ver,@Rev,@Desc,@Notes,@Created,@Modified,@HasImg);
                 SELECT last_insert_rowid();";
         }
         else
         {
             cmd.CommandText = @"
                 UPDATE Projects SET Name=@Name,BoardName=@Board,Version=@Ver,Revision=@Rev,
-                    Description=@Desc,Notes=@Notes,ModifiedDate=@Modified
+                    Description=@Desc,Notes=@Notes,ModifiedDate=@Modified,HasImage=@HasImg
                 WHERE Id=@Id;
                 SELECT @Id;";
             cmd.Parameters.AddWithValue("@Id", p.Id);
@@ -396,6 +399,7 @@ public class DatabaseService
         cmd.Parameters.AddWithValue("@Notes",   p.Notes);
         cmd.Parameters.AddWithValue("@Created", p.CreatedDate.ToString("o"));
         cmd.Parameters.AddWithValue("@Modified", DateTime.Now.ToString("o"));
+        cmd.Parameters.AddWithValue("@HasImg",  p.HasImage ? 1 : 0);
         return Convert.ToInt32(cmd.ExecuteScalar());
     }
 
@@ -715,6 +719,7 @@ public class DatabaseService
         Notes        = S(r,"Notes"),
         CreatedDate  = DateTime.Parse(S(r,"CreatedDate")),
         ModifiedDate = DateTime.Parse(S(r,"ModifiedDate")),
+        HasImage     = I(r,"HasImage") == 1,
     };
 
     private static BomLine ReadBomLine(SqliteDataReader r) => new()

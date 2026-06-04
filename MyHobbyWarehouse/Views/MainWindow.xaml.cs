@@ -263,6 +263,31 @@ public partial class MainWindow : Window
         }
     }
 
+    private void LstProjects_ToolTipOpening(object s, ToolTipEventArgs e)
+    {
+        var dep = e.OriginalSource as DependencyObject;
+        while (dep != null && dep is not ListBoxItem) dep = System.Windows.Media.VisualTreeHelper.GetParent(dep);
+        var item = dep as ListBoxItem;
+        if (item?.DataContext is not Models.Project proj) return;
+        string? imgPath = ImageService.FindProjectImage(proj.Id);
+        if (imgPath != null)
+        {
+            var img = new System.Windows.Controls.Image
+            {
+                Source = ImageService.LoadBitmapFresh(imgPath),
+                Width = 220,
+                Stretch = System.Windows.Media.Stretch.Uniform,
+                Margin = new Thickness(4)
+            };
+            item.ToolTip = new ToolTip { Content = img };
+        }
+        else
+        {
+            item.ToolTip = null;
+            e.Handled = true;
+        }
+    }
+
     private void ShowComponentDetail(Models.Component c)
     {
         PanelComponentDetail.Visibility = Visibility.Visible;        TxtDetailSku.Text   = $"SKU: {c.Sku}  |  Stara SKU: {c.OldSku}  |  Alt: {c.Alt}";
@@ -443,6 +468,9 @@ public partial class MainWindow : Window
         var dlg = new ProjectEditDialog(null);
         if (dlg.ShowDialog() != true) return;
         int id = _db.SaveProject(dlg.Result!);
+        // Save project image if pending
+        if (dlg.PendingImagePath != null)
+            ImageService.SaveProjectImage(id, dlg.PendingImagePath);
         LoadProjects();
         RefreshStats();
         // Select newly created project
@@ -460,6 +488,7 @@ public partial class MainWindow : Window
     private void BtnDeleteProject_Click(object s, RoutedEventArgs e)
     {
         if (LstProjects.SelectedItem is not Project p) return;        if (            MessageBox.Show(TranslationService.Get("ConfirmDeleteProject", p.DisplayName), TranslationService.Get("Confirmation"), MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+        ImageService.DeleteProjectImages(p.Id);
  _db.DeleteProject(p.Id);
         LoadProjects(); RefreshStats(); ClearBom();        SetStatus(TranslationService.Get("StatusProjectDeleted", p.DisplayName));
     }

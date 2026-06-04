@@ -11,6 +11,7 @@ public class Project
     public string   Notes       { get; set; } = string.Empty;
     public DateTime CreatedDate  { get; set; } = DateTime.Now;
     public DateTime ModifiedDate { get; set; } = DateTime.Now;
+    public bool     HasImage     { get; set; }
 
     public string DisplayName => !string.IsNullOrWhiteSpace(Version) || !string.IsNullOrWhiteSpace(Revision)
         ? Name

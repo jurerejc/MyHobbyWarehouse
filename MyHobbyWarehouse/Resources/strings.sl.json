@@ -456,5 +456,7 @@
   "AppLogo": "Logotip",
   "SelectAppLogo": "Izberi logotip programa",
   "LogoBrowseFilter": "Slike|*.png;*.jpg;*.jpeg;*.bmp;*.gif|Vse datoteke|*.*",
-  "LogoSet": "Logotip je nastavljen"
+  "LogoSet": "Logotip je nastavljen",
+  "ProjectImage": "Slika projekta",
+  "SelectProjectImage": "Izberi sliko projekta"
 }

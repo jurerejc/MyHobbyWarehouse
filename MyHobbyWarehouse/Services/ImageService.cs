@@ -47,6 +47,41 @@ public static class ImageService
         }
     }
 
+    public static string ProjectsImagesFolder =>
+        Path.Combine(Path.GetDirectoryName(_dbPath ?? "")!, "images", "projects");
+
+    /// <summary>Returns the image path for a project ID if it exists, else null.</summary>
+    public static string? FindProjectImage(int projectId)
+    {
+        foreach (var ext in new[] { ".jpg", ".jpeg", ".png", ".bmp" })
+        {
+            string path = Path.Combine(ProjectsImagesFolder, projectId + ext);
+            if (File.Exists(path)) return path;
+        }
+        return null;
+    }
+
+    /// <summary>Copies source image to project images folder.</summary>
+    public static string SaveProjectImage(int projectId, string sourcePath)
+    {
+        Directory.CreateDirectory(ProjectsImagesFolder);
+        string ext  = Path.GetExtension(sourcePath).ToLowerInvariant();
+        string dest = Path.Combine(ProjectsImagesFolder, projectId + ext);
+        DeleteProjectImages(projectId);
+        File.Copy(sourcePath, dest, overwrite: true);
+        return dest;
+    }
+
+    /// <summary>Deletes all image files for a project ID.</summary>
+    public static void DeleteProjectImages(int projectId)
+    {
+        foreach (var ext in new[] { ".jpg", ".jpeg", ".png", ".bmp" })
+        {
+            string p = Path.Combine(ProjectsImagesFolder, projectId + ext);
+            if (File.Exists(p)) File.Delete(p);
+        }
+    }
+
     /// <summary>Returns the image path for a SKU if it exists, else null.</summary>
     public static string? FindImage(string sku)
     {

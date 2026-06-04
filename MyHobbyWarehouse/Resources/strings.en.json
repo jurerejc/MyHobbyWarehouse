@@ -465,5 +465,7 @@
   "AppLogo": "Logo image",
   "SelectAppLogo": "Select app logo",
   "LogoBrowseFilter": "Image files|*.png;*.jpg;*.jpeg;*.bmp;*.gif|All files|*.*",
-  "LogoSet": "Logo is set"
+  "LogoSet": "Logo is set",
+  "ProjectImage": "Project image",
+  "SelectProjectImage": "Select project image"
 }
