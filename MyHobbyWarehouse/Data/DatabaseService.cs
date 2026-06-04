@@ -169,6 +169,20 @@ public class DatabaseService
         }
 
         Exec(c, @"
+            CREATE TABLE IF NOT EXISTS AppInfo (
+                Id          INTEGER PRIMARY KEY CHECK (Id = 1),
+                Name        TEXT NOT NULL DEFAULT 'MyHobbyWarehouse',
+                Description TEXT NOT NULL DEFAULT '',
+                LogoPath    TEXT NOT NULL DEFAULT ''
+            );");
+        // Insert default row if missing
+        long existingInfo = Scalar<long>(c, "SELECT COUNT(*) FROM AppInfo");
+        if (existingInfo == 0)
+        {
+            Exec(c, "INSERT INTO AppInfo (Id, Name, Description, LogoPath) VALUES (1, 'MyHobbyWarehouse', '', '')");
+        }
+
+        Exec(c, @"
             CREATE TABLE IF NOT EXISTS StockTransactions (
                 Id                   INTEGER PRIMARY KEY AUTOINCREMENT,
                 ComponentSku         TEXT NOT NULL DEFAULT '',
@@ -1032,6 +1046,40 @@ public class DatabaseService
         using var cmd = c.CreateCommand();
         cmd.CommandText = "DELETE FROM StockTransactions WHERE Notes = @tag";
         cmd.Parameters.AddWithValue("@tag", tag);
+        cmd.ExecuteNonQuery();
+    }
+
+    // ── App Info ──────────────────────────────────────────────────────────────
+
+    public Models.AppInfo GetAppInfo()
+    {
+        using var c = Connect();
+        using var cmd = c.CreateCommand();
+        cmd.CommandText = "SELECT Id, Name, Description, LogoPath FROM AppInfo WHERE Id = 1";
+        using var r = cmd.ExecuteReader();
+        if (r.Read())
+        {
+            return new Models.AppInfo
+            {
+                Id = r.GetInt32(0),
+                Name = r.GetString(1),
+                Description = r.GetString(2),
+                LogoPath = r.GetString(3)
+            };
+        }
+        return new Models.AppInfo();
+    }
+
+    public void SaveAppInfo(Models.AppInfo info)
+    {
+        using var c = Connect();
+        using var cmd = c.CreateCommand();
+        cmd.CommandText = @"
+            UPDATE AppInfo SET Name = @name, Description = @desc, LogoPath = @logo
+            WHERE Id = 1";
+        cmd.Parameters.AddWithValue("@name", info.Name);
+        cmd.Parameters.AddWithValue("@desc", info.Description);
+        cmd.Parameters.AddWithValue("@logo", info.LogoPath);
         cmd.ExecuteNonQuery();
     }
 

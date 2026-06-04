@@ -32,8 +32,8 @@
                         <Ellipse   Canvas.Left="3"  Canvas.Top="10" Width="12" Height="12"
                                    Stroke="{StaticResource AccentBrush}" StrokeThickness="3" Fill="Transparent"/>
                     </Canvas>
-                    <TextBlock Text="{conv:Translate AppTitle}" Style="{StaticResource HeaderText}" VerticalAlignment="Center"/>
-                    <TextBlock Text="{conv:Translate AppSubtitle}"
+                    <TextBlock x:Name="TxtAppTitle" Text="{conv:Translate AppTitle}" Style="{StaticResource HeaderText}" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="TxtAppSubtitle" Text="{conv:Translate AppSubtitle}"
                                Style="{StaticResource SubText}" VerticalAlignment="Center" Margin="8,0,0,0"/>
                 </StackPanel>
 

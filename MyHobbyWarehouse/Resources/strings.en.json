@@ -458,5 +458,8 @@
   "OkButton": "OK",
   "ColStatus": "Status",
   "ColCostPerLine": "\u20AC/line",
-  "ColSku2": "SKU2"
+  "ColSku2": "SKU2",
+  "Appearance": "Appearance",
+  "AppName": "App name",
+  "AppDescription": "App description / subtitle"
 }

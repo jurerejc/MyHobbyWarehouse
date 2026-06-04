@@ -29,12 +29,22 @@ public partial class MainWindow : Window
 
     private void Initialize()
     {
-       
+        LoadAppHeader();
         LoadComponents();
         LoadProjects();
         LoadTransactions();
         RefreshStats();
         SetStatus(TranslationService.Get("StatusReady"));
+    }
+
+    private void LoadAppHeader()
+    {
+        var info = _db.GetAppInfo();
+        TxtAppTitle.Text = info.Name;
+        if (!string.IsNullOrEmpty(info.Description))
+            TxtAppSubtitle.Text = info.Description;
+        var v = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+        Title = $"{info.Name}  v{v!.Major}.{v.Minor}";
     }
 
     // ── Stats ────────────────────────────────────────────────────────────────

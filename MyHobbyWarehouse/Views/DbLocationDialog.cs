@@ -17,11 +17,13 @@ public class DbLocationDialog : Window
 
     private readonly TextBox _txPath;
     private readonly ComboBox _cmbLanguage;
+    private readonly TextBox _txAppName;
+    private readonly TextBox _txAppDesc;
 
     public DbLocationDialog(string? currentPath, string? currentLanguage = null)
     {
         Title  = string.IsNullOrEmpty(currentPath) ? TranslationService.Get("FirstRunTitle") : TranslationService.Get("SettingsTitle");
-        Width  = 560; Height = 520;
+        Width  = 560; Height = 600;
         ResizeMode = ResizeMode.NoResize;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
 
@@ -144,6 +146,43 @@ public class DbLocationDialog : Window
         langBtnRow.Children.Add(btnImportLang);
 
         stack.Children.Add(langBtnRow);
+
+        // ── App appearance ────────────────────────────────────────────────
+        var appHdr = new TextBlock
+        {
+            Text       = TranslationService.Get("Appearance"),
+            FontWeight = FontWeights.SemiBold,
+            Margin     = new Thickness(0, 0, 0, 4)
+        };
+        appHdr.SetResourceReference(TextBlock.ForegroundProperty, "AccentBrush");
+        stack.Children.Add(appHdr);
+
+        var appNameLabel = new TextBlock { Text = TranslationService.Get("AppName"), Margin = new Thickness(0, 0, 0, 2) };
+        appNameLabel.SetResourceReference(TextBlock.ForegroundProperty, "SubTextBrush");
+        stack.Children.Add(appNameLabel);
+
+        _txAppName = new TextBox { Text = "MyHobbyWarehouse", Padding = new Thickness(6, 5, 6, 5), Margin = new Thickness(0, 0, 0, 8) };
+        stack.Children.Add(_txAppName);
+
+        var appDescLabel = new TextBlock { Text = TranslationService.Get("AppDescription"), Margin = new Thickness(0, 0, 0, 2) };
+        appDescLabel.SetResourceReference(TextBlock.ForegroundProperty, "SubTextBrush");
+        stack.Children.Add(appDescLabel);
+
+        _txAppDesc = new TextBox { Text = "", Padding = new Thickness(6, 5, 6, 5), Margin = new Thickness(0, 0, 0, 14) };
+        stack.Children.Add(_txAppDesc);
+
+        // Load existing values from DB if available
+        try
+        {
+            var db = Data.DatabaseService.Current;
+            if (db != null)
+            {
+                var appInfo = db.GetAppInfo();
+                _txAppName.Text = appInfo.Name;
+                _txAppDesc.Text = appInfo.Description;
+            }
+        }
+        catch { /* DB not yet initialized */ }
 
         // Buttons
         var btnRow = new StackPanel
@@ -304,6 +343,21 @@ public class DbLocationDialog : Window
 
         SelectedPath = path;
         SelectedLanguage = _cmbLanguage.SelectedValue?.ToString() ?? "en";
+
+        // Save app info
+        try
+        {
+            var db = Data.DatabaseService.Current;
+            if (db != null)
+            {
+                var info = db.GetAppInfo();
+                info.Name = _txAppName.Text.Trim();
+                info.Description = _txAppDesc.Text.Trim();
+                db.SaveAppInfo(info);
+            }
+        }
+        catch { /* DB not yet initialized */ }
+
         DialogResult = true;
         Close();
     }

@@ -449,5 +449,8 @@
   "OkButton": "V redu",
   "ColStatus": "Status",
   "ColCostPerLine": "\u20AC/vrs.",
-  "ColSku2": "SKU2"
+  "ColSku2": "SKU2",
+  "Appearance": "Videz",
+  "AppName": "Ime programa",
+  "AppDescription": "Opis / podnaslov programa"
 }
