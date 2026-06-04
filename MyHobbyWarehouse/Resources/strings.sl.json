@@ -452,5 +452,8 @@
   "ColSku2": "SKU2",
   "Appearance": "Videz",
   "AppName": "Ime programa",
-  "AppDescription": "Opis / podnaslov programa"
+  "AppDescription": "Opis / podnaslov programa",
+  "AppLogo": "Logotip",
+  "SelectAppLogo": "Izberi logotip programa",
+  "LogoBrowseFilter": "Slike|*.png;*.jpg;*.jpeg;*.bmp;*.gif|Vse datoteke|*.*"
 }

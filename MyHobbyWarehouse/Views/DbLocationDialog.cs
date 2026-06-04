@@ -19,11 +19,12 @@ public class DbLocationDialog : Window
     private readonly ComboBox _cmbLanguage;
     private readonly TextBox _txAppName;
     private readonly TextBox _txAppDesc;
+    private readonly TextBox _txLogoPath;
 
     public DbLocationDialog(string? currentPath, string? currentLanguage = null)
     {
         Title  = string.IsNullOrEmpty(currentPath) ? TranslationService.Get("FirstRunTitle") : TranslationService.Get("SettingsTitle");
-        Width  = 560; Height = 600;
+        Width  = 560; Height = 660;
         ResizeMode = ResizeMode.NoResize;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
 
@@ -168,8 +169,28 @@ public class DbLocationDialog : Window
         appDescLabel.SetResourceReference(TextBlock.ForegroundProperty, "SubTextBrush");
         stack.Children.Add(appDescLabel);
 
-        _txAppDesc = new TextBox { Text = "", Padding = new Thickness(6, 5, 6, 5), Margin = new Thickness(0, 0, 0, 14) };
+        _txAppDesc = new TextBox { Text = "", Padding = new Thickness(6, 5, 6, 5), Margin = new Thickness(0, 0, 0, 8) };
         stack.Children.Add(_txAppDesc);
+
+        // Logo path
+        var logoLabel = new TextBlock { Text = TranslationService.Get("AppLogo"), Margin = new Thickness(0, 0, 0, 2) };
+        logoLabel.SetResourceReference(TextBlock.ForegroundProperty, "SubTextBrush");
+        stack.Children.Add(logoLabel);
+
+        var logoRow = new Grid { Margin = new Thickness(0, 0, 0, 14) };
+        logoRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        logoRow.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+        _txLogoPath = new TextBox { Padding = new Thickness(6, 5, 6, 5), Margin = new Thickness(0, 0, 6, 0) };
+        Grid.SetColumn(_txLogoPath, 0);
+        logoRow.Children.Add(_txLogoPath);
+
+        var btnLogo = new Button { Content = "📂 " + TranslationService.Get("Browse"), Padding = new Thickness(10, 5, 10, 5) };
+        btnLogo.Click += BtnLogo_Click;
+        Grid.SetColumn(btnLogo, 1);
+        logoRow.Children.Add(btnLogo);
+
+        stack.Children.Add(logoRow);
 
         // Load existing values from DB if available
         try
@@ -180,6 +201,7 @@ public class DbLocationDialog : Window
                 var appInfo = db.GetAppInfo();
                 _txAppName.Text = appInfo.Name;
                 _txAppDesc.Text = appInfo.Description;
+                _txLogoPath.Text = appInfo.LogoPath;
             }
         }
         catch { /* DB not yet initialized */ }
@@ -309,6 +331,18 @@ public class DbLocationDialog : Window
             _txPath.Text = dlg.FileName;
     }
 
+    private void BtnLogo_Click(object s, RoutedEventArgs e)
+    {
+        var dlg = new OpenFileDialog
+        {
+            Title = TranslationService.Get("SelectAppLogo"),
+            Filter = TranslationService.Get("LogoBrowseFilter"),
+            CheckFileExists = true
+        };
+        if (dlg.ShowDialog() == true)
+            _txLogoPath.Text = dlg.FileName;
+    }
+
     private void Confirm_Click(object s, RoutedEventArgs e)
     {
         string path = _txPath.Text.Trim();
@@ -353,6 +387,7 @@ public class DbLocationDialog : Window
                 var info = db.GetAppInfo();
                 info.Name = _txAppName.Text.Trim();
                 info.Description = _txAppDesc.Text.Trim();
+                info.LogoPath = _txLogoPath.Text.Trim();
                 db.SaveAppInfo(info);
             }
         }

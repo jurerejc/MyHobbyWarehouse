@@ -45,6 +45,17 @@ public partial class MainWindow : Window
             TxtAppSubtitle.Text = info.Description;
         var v = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
         Title = $"{info.Name}  v{v!.Major}.{v.Minor}";
+        if (!string.IsNullOrEmpty(info.LogoPath) && File.Exists(info.LogoPath))
+        {
+            LogoImage.Source = ImageService.LoadBitmap(info.LogoPath);
+            LogoCanvas.Visibility = Visibility.Collapsed;
+            LogoImage.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            LogoCanvas.Visibility = Visibility.Visible;
+            LogoImage.Visibility = Visibility.Collapsed;
+        }
     }
 
     // ── Stats ────────────────────────────────────────────────────────────────

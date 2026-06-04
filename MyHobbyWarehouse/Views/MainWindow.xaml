@@ -23,8 +23,7 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <!-- PCB trace logo (simple SVG-like path) -->
-                    <Canvas Width="32" Height="32" Margin="0,0,10,0">
+                    <Canvas x:Name="LogoCanvas" Width="32" Height="32" Margin="0,0,10,0">
                         <Rectangle Canvas.Left="4"  Canvas.Top="14" Width="24" Height="4"
                                    Fill="{StaticResource AccentBrush}" RadiusX="2" RadiusY="2"/>
                         <Ellipse   Canvas.Left="22" Canvas.Top="10" Width="12" Height="12"
@@ -32,6 +31,7 @@
                         <Ellipse   Canvas.Left="3"  Canvas.Top="10" Width="12" Height="12"
                                    Stroke="{StaticResource AccentBrush}" StrokeThickness="3" Fill="Transparent"/>
                     </Canvas>
+                    <Image x:Name="LogoImage" Width="32" Height="32" Margin="0,0,10,0" Visibility="Collapsed"/>
                     <TextBlock x:Name="TxtAppTitle" Text="{conv:Translate AppTitle}" Style="{StaticResource HeaderText}" VerticalAlignment="Center"/>
                     <TextBlock x:Name="TxtAppSubtitle" Text="{conv:Translate AppSubtitle}"
                                Style="{StaticResource SubText}" VerticalAlignment="Center" Margin="8,0,0,0"/>

@@ -461,5 +461,8 @@
   "ColSku2": "SKU2",
   "Appearance": "Appearance",
   "AppName": "App name",
-  "AppDescription": "App description / subtitle"
+  "AppDescription": "App description / subtitle",
+  "AppLogo": "Logo image",
+  "SelectAppLogo": "Select app logo",
+  "LogoBrowseFilter": "Image files|*.png;*.jpg;*.jpeg;*.bmp;*.gif|All files|*.*"
 }
