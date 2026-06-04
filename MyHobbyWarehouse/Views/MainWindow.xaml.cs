@@ -270,22 +270,19 @@ public partial class MainWindow : Window
         var item = dep as ListBoxItem;
         if (item?.DataContext is not Models.Project proj) return;
         string? imgPath = ImageService.FindProjectImage(proj.Id);
+        var stack = new StackPanel { Margin = new Thickness(4) };
+        stack.Children.Add(new TextBlock { Text = $"ID={proj.Id} Img={imgPath ?? "(null)"}", FontSize = 11 });
         if (imgPath != null)
         {
-            var img = new System.Windows.Controls.Image
+            stack.Children.Add(new System.Windows.Controls.Image
             {
                 Source = ImageService.LoadBitmapFresh(imgPath),
                 Width = 220,
                 Stretch = System.Windows.Media.Stretch.Uniform,
-                Margin = new Thickness(4)
-            };
-            item.ToolTip = new ToolTip { Content = img };
+                Margin = new Thickness(0, 4, 0, 0)
+            });
         }
-        else
-        {
-            item.ToolTip = null;
-            e.Handled = true;
-        }
+        item.ToolTip = new ToolTip { Content = stack };
     }
 
     private void ShowComponentDetail(Models.Component c)

@@ -338,6 +338,7 @@
                                  SelectionChanged="LstProjects_SelectionChanged">
                             <ListBox.ItemContainerStyle>
                                 <Style TargetType="ListBoxItem">
+                                    <Setter Property="ToolTip" Value=" "/>
                                     <EventSetter Event="ToolTipOpening" Handler="LstProjects_ToolTipOpening"/>
                                 </Style>
                             </ListBox.ItemContainerStyle>
