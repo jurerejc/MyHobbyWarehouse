@@ -20,7 +20,7 @@ public class ProjectEditDialog : Window
     public ProjectEditDialog(Project? existing)
     {
         Title  = existing == null ? TranslationService.Get("NewProject") : TranslationService.Get("EditProject");
-        Width  = 520; Height = 580;
+        Width  = 520; Height = 680;
         ResizeMode = ResizeMode.NoResize;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
 
