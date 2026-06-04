@@ -335,8 +335,12 @@
 
                         <ListBox x:Name="LstProjects" Grid.Row="1"
                                  Background="Transparent" BorderThickness="0"
-                                 SelectionChanged="LstProjects_SelectionChanged"
-                                 ToolTipOpening="LstProjects_ToolTipOpening">
+                                 SelectionChanged="LstProjects_SelectionChanged">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <EventSetter Event="ToolTipOpening" Handler="LstProjects_ToolTipOpening"/>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <Border Padding="8,6" Margin="2,1" CornerRadius="4">
