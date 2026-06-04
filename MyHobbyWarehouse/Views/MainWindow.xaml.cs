@@ -863,37 +863,60 @@ public partial class MainWindow : Window
     {
         if (sender is not DataGrid grid) return;
 
-        // Find row under mouse
         var pos = e.GetPosition(grid);
         var hit = System.Windows.Media.VisualTreeHelper.HitTest(grid, pos);
         if (hit == null) { HideImagePopup(); return; }
 
-        // Walk visual tree up to DataGridRow
         var dep = hit.VisualHit as System.Windows.DependencyObject;
         while (dep != null && dep is not DataGridRow)
             dep = System.Windows.Media.VisualTreeHelper.GetParent(dep);
 
         if (dep is not DataGridRow row) { HideImagePopup(); return; }
 
-        // Get SKU from row data context
-        string? sku = row.DataContext switch
+        string? sku = null;
+        string? locCode = null;
+        if (row.DataContext is Models.Component c)
         {
-            Models.Component c  => c.Sku,
-            Models.BomLine    b => b.Sku,
-            _                   => null
-        };
+            sku = c.Sku;
+            locCode = c.LocationCode;
+        }
+        else if (row.DataContext is Models.BomLine b)
+        {
+            sku = b.Sku;
+            locCode = b.Component?.LocationCode;
+        }
+        else { HideImagePopup(); return; }
 
         if (string.IsNullOrEmpty(sku)) { HideImagePopup(); return; }
-        if (sku == _lastHoverSku)      return; // already showing
+        if (sku == _lastHoverSku) return;
 
-        string? imgPath = Services.ImageService.FindImage(sku);
-        if (imgPath == null) { HideImagePopup(); return; }
+        string? compImg = Services.ImageService.FindImage(sku);
+        if (compImg == null) { HideImagePopup(); return; }
 
-        _lastHoverSku      = sku;
-        var bmp            = Services.ImageService.LoadBitmap(imgPath);
-        PopupImage.Source  = bmp;
-        PopupSku.Text      = sku;
-        ImagePopup.IsOpen  = true;
+        _lastHoverSku = sku;
+        PopupImage.Source = Services.ImageService.LoadBitmap(compImg);
+        PopupSku.Text = sku;
+
+        if (!string.IsNullOrEmpty(locCode))
+        {
+            string? locImg = Services.ImageService.FindLocationImage(locCode);
+            if (locImg != null)
+            {
+                PopupLocationImage.Source = Services.ImageService.LoadBitmap(locImg);
+                PopupLocation.Text = locCode;
+                PopupLocationBorder.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                PopupLocationBorder.Visibility = Visibility.Collapsed;
+            }
+        }
+        else
+        {
+            PopupLocationBorder.Visibility = Visibility.Collapsed;
+        }
+
+        ImagePopup.IsOpen = true;
     }
 
     private void Grid_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
@@ -906,6 +929,8 @@ public partial class MainWindow : Window
             ImagePopup.IsOpen = false;
             _lastHoverSku     = null;
             PopupImage.Source = null;
+            PopupLocationImage.Source = null;
+            PopupLocationBorder.Visibility = Visibility.Collapsed;
         }
     }
 

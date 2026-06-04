@@ -449,6 +449,7 @@
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="{conv:Translate ColStatus}" Binding="{Binding DisplayStatus}"  Width="52"/>
                                 <DataGridTextColumn Header="{conv:Translate ColSku}"    Binding="{Binding Sku}"            Width="65"/>
+                                <DataGridTextColumn Header="{conv:Translate ColLocation}" Binding="{Binding DisplayLocation}" Width="70"/>
                                 <DataGridTextColumn Header="{conv:Translate ColDescription}"   Binding="{Binding DisplayDescription}" Width="*" MinWidth="180"/>
                                 <DataGridTextColumn Header="{conv:Translate ExportBomColQty}"    Binding="{Binding Qty}"            Width="50"/>
                                 <DataGridTextColumn Header="{conv:Translate ColUnit}"  Binding="{Binding Unit}"           Width="55"/>
@@ -578,16 +579,36 @@
                     CornerRadius="4"
                     Padding="4"
                     Effect="{x:Null}">
-                <StackPanel>
-                    <Image x:Name="PopupImage"
-                           Width="280" Height="210"
-                           Stretch="Uniform"
-                           RenderOptions.BitmapScalingMode="HighQuality"/>
-                    <TextBlock x:Name="PopupSku"
-                               FontSize="10" Margin="2,2,2,0"
-                               HorizontalAlignment="Center"
-                               Foreground="{StaticResource SubTextBrush}"/>
-                </StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Margin="0,0,4,0" Padding="0,0,4,0">
+                        <StackPanel>
+                            <Image x:Name="PopupImage"
+                                   Width="220" Height="165"
+                                   Stretch="Uniform"
+                                   RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <TextBlock x:Name="PopupSku"
+                                       FontSize="10" Margin="2,2,2,0"
+                                       HorizontalAlignment="Center"
+                                       Foreground="{StaticResource SubTextBrush}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="1" x:Name="PopupLocationBorder" Visibility="Collapsed">
+                        <StackPanel>
+                            <Image x:Name="PopupLocationImage"
+                                   Width="220" Height="165"
+                                   Stretch="Uniform"
+                                   RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <TextBlock x:Name="PopupLocation"
+                                       FontSize="10" Margin="2,2,2,0"
+                                       HorizontalAlignment="Center"
+                                       Foreground="{StaticResource AccentBrush}"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
             </Border>
         </Popup>
 
