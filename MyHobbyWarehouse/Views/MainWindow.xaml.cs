@@ -236,18 +236,11 @@ public partial class MainWindow : Window
             if (loc != null)
             {
                 string? locImg = ImageService.FindLocationImage(loc.Code);
-                panel.Children.Add(new TextBlock
-                {
-                    Text = $"Location: {loc.Code}  Img: {locImg ?? "(null)"}",
-                    FontSize = 11,
-                    VerticalAlignment = System.Windows.VerticalAlignment.Center,
-                    Margin = new Thickness(4)
-                });
                 if (locImg != null)
                 {
                     panel.Children.Add(new System.Windows.Controls.Image
                     {
-                        Source = ImageService.LoadBitmapFresh(locImg),
+                        Source = ImageService.LoadBitmap(locImg),
                         Width = 200,
                         Stretch = System.Windows.Media.Stretch.Uniform,
                     });
@@ -270,19 +263,21 @@ public partial class MainWindow : Window
         var item = dep as ListBoxItem;
         if (item?.DataContext is not Models.Project proj) return;
         string? imgPath = ImageService.FindProjectImage(proj.Id);
-        var stack = new StackPanel { Margin = new Thickness(4) };
-        stack.Children.Add(new TextBlock { Text = $"ID={proj.Id} Img={imgPath ?? "(null)"}", FontSize = 11 });
         if (imgPath != null)
         {
-            stack.Children.Add(new System.Windows.Controls.Image
+            var img = new System.Windows.Controls.Image
             {
-                Source = ImageService.LoadBitmapFresh(imgPath),
+                Source = ImageService.LoadBitmap(imgPath),
                 Width = 220,
                 Stretch = System.Windows.Media.Stretch.Uniform,
-                Margin = new Thickness(0, 4, 0, 0)
-            });
+                Margin = new Thickness(4)
+            };
+            item.ToolTip = new ToolTip { Content = img };
         }
-        item.ToolTip = new ToolTip { Content = stack };
+        else
+        {
+            item.ToolTip = new ToolTip { Content = TranslationService.Get("NoImage") };
+        }
     }
 
     private void ShowComponentDetail(Models.Component c)
