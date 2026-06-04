@@ -3,6 +3,7 @@ using ICollectionView = System.ComponentModel.ICollectionView;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using MyHobbyWarehouse.Data;
 using MyHobbyWarehouse.Models;
@@ -256,6 +257,8 @@ public partial class MainWindow : Window
         }
     }
 
+    private readonly Dictionary<int, BitmapImage?> _projImgCache = new();
+
     private void LstProjects_ToolTipOpening(object s, ToolTipEventArgs e)
     {
         var dep = e.OriginalSource as DependencyObject;
@@ -265,14 +268,21 @@ public partial class MainWindow : Window
         string? imgPath = ImageService.FindProjectImage(proj.Id);
         if (imgPath != null)
         {
-            var img = new System.Windows.Controls.Image
+            if (!_projImgCache.TryGetValue(proj.Id, out var bmp) || bmp == null)
             {
-                Source = ImageService.LoadBitmap(imgPath),
-                Width = 220,
-                Stretch = System.Windows.Media.Stretch.Uniform,
-                Margin = new Thickness(4)
+                bmp = ImageService.LoadBitmap(imgPath);
+                _projImgCache[proj.Id] = bmp;
+            }
+            item.ToolTip = new ToolTip
+            {
+                Content = new System.Windows.Controls.Image
+                {
+                    Source = bmp,
+                    Width = 220,
+                    Stretch = System.Windows.Media.Stretch.Uniform,
+                    Margin = new Thickness(4)
+                }
             };
-            item.ToolTip = new ToolTip { Content = img };
         }
         else
         {
@@ -409,6 +419,7 @@ public partial class MainWindow : Window
     private void LoadProjects()
     {
         LstProjects.ItemsSource = _db.GetAllProjects();
+        _projImgCache.Clear();
     }
 
     private void LstProjects_SelectionChanged(object s, SelectionChangedEventArgs e)
