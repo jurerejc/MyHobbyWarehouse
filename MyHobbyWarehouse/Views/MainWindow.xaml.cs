@@ -641,6 +641,24 @@ public partial class MainWindow : Window
         ExportService.ExportBomXlsx(p, _currentBom, dlg.FileName);        SetStatus(TranslationService.Get("StatusBomExported", dlg.FileName));
     }
 
+    private void BtnCreateOrder_Click(object s, RoutedEventArgs e)
+    {
+        if (LstProjects.SelectedItem is not Project p) { SetStatus(TranslationService.Get("StatusSelectProject")); return; }
+        if (_currentBom.Count == 0) { SetStatus(TranslationService.Get("StatusBomEmpty")); return; }
+
+        var numDlg = new InputDialog(TranslationService.Get("OrderPromptTitle"), TranslationService.Get("OrderPrompt"), "1");
+        if (numDlg.ShowDialog() != true) return;
+        if (!int.TryParse(numDlg.InputValue, out int boards) || boards <= 0)
+        {
+            MessageBox.Show(TranslationService.Get("BuildInvalid"), TranslationService.Get("ErrorTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
+        }
+
+        var win = new OrderWindow(p, _currentBom, boards);
+        win.Owner = this;
+        win.ShowDialog();
+    }
+
     private void GridBom_DoubleClick(object s, System.Windows.Input.MouseButtonEventArgs e)
     {
         if (GridBom.SelectedItem is not Models.BomLine line) return;

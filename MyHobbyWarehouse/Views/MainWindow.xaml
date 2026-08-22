@@ -411,8 +411,10 @@
                                             Click="BtnStockCheck_Click"/>
                                     <Button Content="{conv:Translate BuildPcb}" Margin="4,0"
                                             Click="BtnBuild_Click"/>
-                                    <Button Content="{conv:Translate ExportBom}" Margin="4,0"
-                                            Click="BtnExportBom_Click"/>
+            <Button Content="{conv:Translate ExportBom}" Margin="4,0"
+                    Click="BtnExportBom_Click"/>
+            <Button Content="{conv:Translate CreateOrder}" Margin="4,0"
+                    Click="BtnCreateOrder_Click" Style="{StaticResource AccentButton}"/>
                                 </StackPanel>
                             </Grid>
                         </Border>
