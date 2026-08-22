@@ -24,6 +24,7 @@
   "OrderInfo": "Order for '{0}' ({1}×) — {2} parts to order",
   "OrderTotal": "Total: {0:F4} €",
   "OrderExported": "Order exported to {0}",
+  "OrderFilePrefix": "order",
   "CopyList": "Copy list",
   "ListCopied": "List copied to clipboard.",
   "InfoTitle": "Info",

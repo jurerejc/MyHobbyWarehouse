@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,6 +13,7 @@ namespace MyHobbyWarehouse.Views;
 public class OrderWindow : Window
 {
     private readonly List<OrderLine> _lines;
+    private readonly string _projectName;
 
     public OrderWindow(Project project, List<BomLine> bom, int boards)
     {
@@ -19,6 +22,7 @@ public class OrderWindow : Window
         ResizeMode = ResizeMode.NoResize;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
 
+        _projectName = project.DisplayName;
         _lines = ComputeOrder(bom, boards);
 
         var outer = new Border
@@ -142,10 +146,12 @@ public class OrderWindow : Window
 
     private void BtnExport_Click(object s, RoutedEventArgs e)
     {
+        string safeName = string.Concat(_projectName.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries));
+        string prefix   = TranslationService.Get("OrderFilePrefix");
         var dlg = new Microsoft.Win32.SaveFileDialog
         {
             Filter = TranslationService.Get("ImportCsvFilter"),
-            FileName = "order.csv"
+            FileName = $"{prefix}_{safeName}_{DateTime.Now:yyyy-MM-dd}.csv"
         };
         if (dlg.ShowDialog() != true) return;
         using var w = new System.IO.StreamWriter(dlg.FileName);

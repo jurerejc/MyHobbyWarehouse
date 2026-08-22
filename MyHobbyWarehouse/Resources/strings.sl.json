@@ -24,6 +24,7 @@
   "OrderInfo": "Naročilo za '{0}' ({1}×) — {2} delov za naročiti",
   "OrderTotal": "Skupaj: {0:F4} €",
   "OrderExported": "Naročilo izvoženo v {0}",
+  "OrderFilePrefix": "narocilo",
   "CopyList": "Kopiraj seznam",
   "ListCopied": "Seznam kopiran v odložišče.",
   "InfoTitle": "Info",
