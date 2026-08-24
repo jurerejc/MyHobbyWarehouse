@@ -389,6 +389,12 @@ public class ComponentEditDialog : Window
     {
         string sku = _txSku.Text.Trim();
         if (string.IsNullOrEmpty(sku))         { Err(TranslationService.Get("SkuRequiredMsg")); return; }
+        if (_isNew && _db.GetComponent(sku) != null)
+        {
+            MessageBox.Show(TranslationService.Get("SkuExistsMsg", sku), TranslationService.Get("SkuExistsTitle"),
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
         if (string.IsNullOrEmpty(_txDesc.Text)) { Err(TranslationService.Get("DescriptionRequiredMsg")); return; }
 
         var comp = _original ?? new Component { Sku = sku };

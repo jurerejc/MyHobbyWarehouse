@@ -88,7 +88,11 @@
   "NewComponent": "Nov element",
   "EditComponent": "Uredi element",
   "SkuRequired": "SKU je obvezen.",
+  "SkuRequiredMsg": "SKU je obvezen.",
   "DescriptionRequired": "Opis je obvezen.",
+  "DescriptionRequiredMsg": "Opis je obvezen.",
+  "SkuExistsTitle": "SKU že obstaja",
+  "SkuExistsMsg": "Komponenta s SKU '{0}' že obstaja. Uporabi drug SKU ali odpri obstoječo komponento iz seznama za urejanje.",
 
   "NewProject": "Nov projekt",
   "EditProject": "Uredi projekt",

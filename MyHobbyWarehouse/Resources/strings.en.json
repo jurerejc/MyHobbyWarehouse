@@ -88,7 +88,11 @@
   "NewComponent": "New component",
   "EditComponent": "Edit component",
   "SkuRequired": "SKU is required.",
+  "SkuRequiredMsg": "SKU is required.",
   "DescriptionRequired": "Description is required.",
+  "DescriptionRequiredMsg": "Description is required.",
+  "SkuExistsTitle": "SKU already exists",
+  "SkuExistsMsg": "A component with SKU '{0}' already exists. Use a different SKU or open the existing component from the list to edit it.",
 
   "NewProject": "New project",
   "EditProject": "Edit project",
