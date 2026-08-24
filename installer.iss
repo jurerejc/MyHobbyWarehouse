@@ -5,7 +5,7 @@
 #define MyAppName "MyHobbyWarehouse"
 #define MyAppVersion "1.5"
 #define MyAppPublisher "Jure Rejc"
-#define MyAppURL "https://github.com/jurerejc/EagleManager"
+#define MyAppURL "https://github.com/jurerejc/MyHobbyWarehouse"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
