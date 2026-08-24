@@ -4,7 +4,6 @@
         xmlns:conv="clr-namespace:MyHobbyWarehouse.Converters"
         Title="{conv:Translate AppTitle}" Height="780" Width="1280"
         MinHeight="600" MinWidth="900"
-        Icon="pack://application:,,,/Resources/app.ico"
         WindowStartupLocation="CenterScreen">
 
     <Grid>

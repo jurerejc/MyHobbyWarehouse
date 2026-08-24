@@ -1,6 +1,7 @@
 using System.Windows.Data;
 using ICollectionView = System.ComponentModel.ICollectionView;
 using System.Windows;
+using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
@@ -22,10 +23,24 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        SetAppIcon();
         _db = DatabaseService.Current!;
         var v = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
         Title = $"{TranslationService.Get("AppTitle")}  v{v!.Major}.{v.Minor}";
         Loaded += (_, _) => Initialize();
+    }
+
+    private void SetAppIcon()
+    {
+        try
+        {
+            var asm = System.Reflection.Assembly.GetExecutingAssembly();
+            var res = asm.GetManifestResourceNames()
+                .FirstOrDefault(n => n.EndsWith("app.ico", System.StringComparison.OrdinalIgnoreCase));
+            if (res != null)
+                Icon = new BitmapImage(new Uri("pack://application:,,,/" + res, UriKind.Absolute));
+        }
+        catch { /* icon is non-critical */ }
     }
 
     private void Initialize()
