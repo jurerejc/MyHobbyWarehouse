@@ -64,6 +64,9 @@
                     <Button Content="⚙" ToolTip="{conv:Translate SettingsTooltip}" Margin="4,0,0,0"
                             Padding="8,4" Click="BtnSettings_Click"
                             VerticalAlignment="Center"/>
+                    <Button Content="{conv:Translate Donate}" ToolTip="{conv:Translate DonateTooltip}" Margin="4,0,0,0"
+                            Padding="8,4" Click="BtnDonate_Click" VerticalAlignment="Center"
+                            Style="{StaticResource AccentButton}"/>
                 </StackPanel>
             </Grid>
         </Border>

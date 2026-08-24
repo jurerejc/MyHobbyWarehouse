@@ -38,6 +38,8 @@
   "Language": "Language",
   "English": "English",
   "Slovenian": "Slovenian",
+  "Donate": "\u2615 Ko-fi",
+  "DonateTooltip": "Support this project",
 
   "TabLibrary": "Component Library",
   "TabProjects": "Projects",

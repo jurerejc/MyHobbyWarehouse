@@ -30,6 +30,18 @@ public partial class MainWindow : Window
         Loaded += (_, _) => Initialize();
     }
 
+    private void BtnDonate_Click(object s, RoutedEventArgs e)
+    {
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://ko-fi.com/cendof")
+            {
+                UseShellExecute = true
+            });
+        }
+        catch { /* ignore if no browser */ }
+    }
+
     private void SetAppIcon()
     {
         try
