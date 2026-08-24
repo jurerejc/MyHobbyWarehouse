@@ -8,6 +8,7 @@
     <UseWPF>true</UseWPF>
     <AssemblyName>MyHobbyWarehouse</AssemblyName>
     <RootNamespace>MyHobbyWarehouse</RootNamespace>
+    <ApplicationIcon>Resources\app.ico</ApplicationIcon>
     <Version>1.5</Version>
   </PropertyGroup>
 
@@ -21,6 +22,7 @@
     <Content Include="Resources\strings.*.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Resource Include="Resources\app.ico" />
     <Content Include="samples\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

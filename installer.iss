@@ -22,6 +22,7 @@ DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 OutputDir=installer
 OutputBaseFilename={#MyAppName}-setup-{#MyAppVersion}
+SetupIconFile=MyHobbyWarehouse\Resources\app.ico
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
