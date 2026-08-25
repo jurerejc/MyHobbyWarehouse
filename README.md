@@ -20,7 +20,7 @@ orders for missing parts.
 ## Download & Install
 
 Download the latest `MyHobbyWarehouse-setup-<version>.exe` from
-[GitHub Releases](https://github.com/jurerejc/MyHobbyWarehouse/releases) and run it.
+[GitHub Releases](https://github.com/cendof/MyHobbyWarehouse/releases) and run it.
 It installs to `C:\Program Files\MyHobbyWarehouse` with Start Menu and Desktop
 shortcuts. On first launch it asks for the database location (e.g. your
 OwnCloud / network folder).
