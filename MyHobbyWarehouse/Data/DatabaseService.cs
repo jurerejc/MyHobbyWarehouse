@@ -877,8 +877,7 @@ public class DatabaseService
         var locMap = GetLocationCodeMap();
         foreach (var comp in list)
         {
-            if (comp.LocationId.HasValue && locMap.TryGetValue(comp.LocationId.Value, out var code))
-                comp.LocationCode = code;
+            comp.LocationCode = (comp.LocationId.HasValue && locMap.TryGetValue(comp.LocationId.Value, out var code)) ? code : "";
         }
     }
 

@@ -295,6 +295,7 @@
   "InStock": "Na zalogi",
   "OutOfStock": "Brez zaloge",
   "NoLocation": "(brez)",
+  "NoLocationDesc": "Brez lokacije",
   "NoSupplier": "(brez)",
 
   "ErrorTitle": "Napaka",

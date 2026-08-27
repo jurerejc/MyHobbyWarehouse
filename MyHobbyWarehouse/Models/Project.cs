@@ -13,9 +13,16 @@ public class Project
     public DateTime ModifiedDate { get; set; } = DateTime.Now;
     public bool     HasImage     { get; set; }
 
-    public string DisplayName => !string.IsNullOrWhiteSpace(Version) || !string.IsNullOrWhiteSpace(Revision)
-        ? Name
-        : $"{Name}  {Version}  {Revision}".Trim();
+    public string DisplayName
+    {
+        get
+        {
+            var ver = $"{Version} {Revision}".Trim();
+            return string.IsNullOrEmpty(ver) ? Name : $"{Name} ({ver})";
+        }
+    }
+
+    public override string ToString() => DisplayName;
 
     public string DisplayDate => ModifiedDate.ToString("dd.MM.yyyy");
 }

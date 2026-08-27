@@ -87,11 +87,22 @@ public class ComponentEditDialog : Window
         locGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         locGrid.Children.Add(Lbl(TranslationService.Get("Location")));
         _locations = _db.GetAllLocations();
+        var noneLoc = new Location { Id = -1, Code = TranslationService.Get("NoLocation"), Description = TranslationService.Get("NoLocationDesc") };
+        var locItems = new List<Location> { noneLoc };
+        locItems.AddRange(_locations);
         _cbLocation = new ComboBox
         {
-            ItemsSource = _locations,
+            ItemsSource = locItems,
             Margin = new Thickness(0, 0, 6, 0)
         };
+        var locXaml = @"<DataTemplate xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"">
+    <StackPanel Orientation=""Horizontal"">
+        <TextBlock Text=""{Binding Code}""/>
+        <TextBlock Text="", ""/>
+        <TextBlock Text=""{Binding Description}""/>
+    </StackPanel>
+</DataTemplate>";
+        _cbLocation.ItemTemplate = (System.Windows.DataTemplate)System.Windows.Markup.XamlReader.Parse(locXaml);
         Grid.SetRow(_cbLocation, 1); Grid.SetColumn(_cbLocation, 0);
         locGrid.Children.Add(_cbLocation);
         _imgLocation = new System.Windows.Controls.Image
@@ -404,7 +415,8 @@ public class ComponentEditDialog : Window
         comp.Unit = string.IsNullOrEmpty(_txUnit.Text) ? "pcs" : _txUnit.Text.Trim();
         comp.StockSum = D(_txStockSum.Text); comp.LastPrice = D(_txLastPrice.Text);
         comp.StockValue = comp.StockSum * comp.LastPrice;
-        comp.LocationId = (_cbLocation.SelectedItem as Location)?.Id;
+        var selLoc = _cbLocation.SelectedItem as Location;
+        comp.LocationId = (selLoc != null && selLoc.Id > 0) ? selLoc.Id : (int?)null;
         comp.MassMg = D(_txMassMg.Text); comp.Smd = _chkSmd.IsChecked == true;
         comp.Category1 = CbT(_cbCat1); comp.Category2 = CbT(_cbCat2);
         comp.Category3 = CbT(_cbCat3); comp.Category4 = CbT(_cbCat4); comp.Category5 = CbT(_cbCat5);

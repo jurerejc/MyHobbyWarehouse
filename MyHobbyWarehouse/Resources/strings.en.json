@@ -295,6 +295,7 @@
   "InStock": "In stock",
   "OutOfStock": "Out of stock",
   "NoLocation": "(none)",
+  "NoLocationDesc": "No location",
   "NoSupplier": "(none)",
 
   "ErrorTitle": "Error",

@@ -74,11 +74,7 @@ public partial class Component : ObservableObject
     public string DisplayStock     => $"{StockSum:F0} {Unit}";
     public string DisplayPrice     => LastPrice  > 0 ? TranslationService.Get("DisplayPriceFormat", LastPrice)  : TranslationService.Get("ValueNone");
     public string DisplayValue     => StockValue > 0 ? TranslationService.Get("DisplayValueFormat", StockValue) : TranslationService.Get("ValueNone");
-    public string DisplayLocation  => !string.IsNullOrEmpty(LocationCode)
-        ? LocationCode
-        : StockRack > 0
-            ? $"R{StockRack}" + (StockPackage > 0 ? $"-P{StockPackage}" : "")
-            : "";
+    public string DisplayLocation  => LocationCode ?? "";
     public string DisplaySmd       => Smd ? TranslationService.Get("SmdLabel") : TranslationService.Get("ThLabel");
     public string DisplayCategory  => string.Join(TranslationService.Get("CategorySeparator"),
         new[] { Category1, Category2, Category3, Category4 }

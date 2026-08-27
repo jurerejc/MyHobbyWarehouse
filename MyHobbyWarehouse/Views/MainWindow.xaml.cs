@@ -28,6 +28,7 @@ public partial class MainWindow : Window
         var v = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
         Title = $"{TranslationService.Get("AppTitle")}  v{v!.Major}.{v.Minor}";
         Loaded += (_, _) => Initialize();
+        _searchTimer.Tick += (_, _) => { _searchTimer.Stop(); RunSearch(TxtSearch.Text); };
     }
 
     private void BtnDonate_Click(object s, RoutedEventArgs e)
@@ -112,6 +113,9 @@ public partial class MainWindow : Window
 
         _allComponents  = _db.GetAllComponents();
         PrecomputeImageStatus(_allComponents);
+        _searchBlob.Clear();
+        foreach (var c in _allComponents)
+            _searchBlob[c] = $"{c.Sku} {c.Description} {c.Category1} {c.Category3} {c.Category4} {c.ManufacturerPart} {c.LastSupplier} {c.OldSku}".ToLowerInvariant();
         _componentsView = CollectionViewSource.GetDefaultView(_allComponents);
         _componentsView.Filter = FilterPredicate;
         GridComponents.ItemsSource = _componentsView;
@@ -734,9 +738,8 @@ public partial class MainWindow : Window
     {
         var dlg = new LocationEditDialog(_db);
         dlg.Owner = this;
-        dlg.ShowDialog();
-        // Refresh components so location codes are up-to-date
-        LoadComponents();
+        try { dlg.ShowDialog(); }
+        finally { LoadComponents(); }
     }
 
     private void BtnSettings_Click(object s, RoutedEventArgs e)
@@ -772,6 +775,8 @@ public partial class MainWindow : Window
 
     private List<Models.Component> _searchMatches = [];
     private int _searchIndex = -1;
+    private readonly Dictionary<Models.Component, string> _searchBlob = new();
+    private readonly System.Windows.Threading.DispatcherTimer _searchTimer = new() { Interval = System.TimeSpan.FromMilliseconds(250) };
 
     protected override void OnKeyDown(System.Windows.Input.KeyEventArgs e)
     {
@@ -820,21 +825,34 @@ public partial class MainWindow : Window
 
     private void TxtSearch_TextChanged(object s, TextChangedEventArgs e)
     {
-        string q = TxtSearch.Text.Trim();        if (string.IsNullOrEmpty(q)) { _searchMatches.Clear(); _searchIndex = -1; TxtSearchCount.Text = ""; return; }
+        if (string.IsNullOrWhiteSpace(TxtSearch.Text))
+        {
+            _searchTimer.Stop();
+            _searchMatches.Clear();
+            _searchIndex = -1;
+            TxtSearchCount.Text = "";
+            return;
+        }
+        _searchTimer.Stop();
+        _searchTimer.Start();
+    }
 
-        _searchMatches = _allComponents.Where(c =>
-            c.Sku.Contains(q, StringComparison.OrdinalIgnoreCase)         ||
-            c.Description.Contains(q, StringComparison.OrdinalIgnoreCase) ||
-            c.Category1.Contains(q, StringComparison.OrdinalIgnoreCase)   ||
-            c.Category3.Contains(q, StringComparison.OrdinalIgnoreCase)   ||
-            c.Category4.Contains(q, StringComparison.OrdinalIgnoreCase)   ||
-            c.ManufacturerPart.Contains(q, StringComparison.OrdinalIgnoreCase) ||
-            c.LastSupplier.Contains(q, StringComparison.OrdinalIgnoreCase) ||
-            c.OldSku.Contains(q, StringComparison.OrdinalIgnoreCase)
-        ).ToList();
+    private void RunSearch(string rawQuery)
+    {
+        string q = rawQuery.Trim().ToLowerInvariant();
+        if (string.IsNullOrEmpty(q))
+        {
+            _searchMatches.Clear();
+            _searchIndex = -1;
+            TxtSearchCount.Text = "";
+            return;
+        }
 
+        _searchMatches = _allComponents.Where(c => _searchBlob[c].Contains(q)).ToList();
         _searchIndex = -1;
-        TxtSearchCount.Text = _searchMatches.Count == 0            ? TranslationService.Get("NoMatches")            : TranslationService.Get("SearchResults", 0, _searchMatches.Count);
+        TxtSearchCount.Text = _searchMatches.Count == 0
+            ? TranslationService.Get("NoMatches")
+            : TranslationService.Get("SearchResults", 0, _searchMatches.Count);
         if (_searchMatches.Count > 0) SearchNext();
     }
 
